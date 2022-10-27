@@ -1,0 +1,33 @@
+Project Plan
+
+Objective:
+We will use Project 1 as a starter to get a list of Securities, ETFs etc, (NO CRYPTO)
+Compare two or more machine learning models for solving a predictive task.
+
+
+Tasks:
+	1. Do a basic performance analysis and risk tolerance of each and pick the top performing Stocks for the Client to Choose one.
+	2. Remove any further processing of MonteCarlo etc and continue with below tasks
+	3. Once a Stock is chosen,
+		* We do a Baseline Algorith with Simple Averages (50, 200)
+		* We do the second Baseline Algorith using RSI (buy below 30 and sell above 70)
+	4. We can do a comparison of both Baselines first and ask the Client to Choose one Baseline of the two
+	5. Once the Client chooses the Baseline
+	6. Add 3 Machine Learning models and evaluate the performance
+		
+		
+		
+Sprint 1 
+Kalyan
+	Get the code from Project 1 and work on Task 1 and 2 above
+Daniel
+	Work on a RSI based Baseline Algorithm (do in Jupyter Notebook)
+James
+	Work on a Simple Moving Averages Baseline Algorithm (50, 200) (Jupyter Notebook)
+Severo
+	Work on 3 Machine Learning models for moving averages
+Alyssa
+	Work on any Documentation and Presentation needed for the Project.
+
+
+Sprint 2
