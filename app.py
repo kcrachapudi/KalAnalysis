@@ -4,29 +4,6 @@ import pandas as pd
 import numpy as np
 
 
-# This code is different for each deployed app.
-CURRENT_THEME = "blue"
-IS_DARK_THEME = True
-EXPANDER_TEXT = """
-    This is a custom theme. You can enable it by copying the following code
-    to `.streamlit/config.toml`:
-
-    ```python
-    [theme]
-    primaryColor = "#E694FF"
-    backgroundColor = "#00172B"
-    secondaryBackgroundColor = "#0083B8"
-    textColor = "#C6CDD4"
-    font = "sans-serif"
-    ```
-    """
-
-
-# This code is the same for each deployed app.
-st.image(
-    "https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/240/apple/271/artist-palette_1f3a8.png",
-    width=100,
-)
 
 """
 # KalAnalysis.com!
@@ -35,56 +12,10 @@ Comprehensive AI based Quant Stock Analysis to empower Users to make informed Tr
 
 ""
 
-THEMES = [
-    "light",
-    "dark",
-    "green",
-    "blue",
-]
-GITHUB_OWNER = "streamlit"
-
-# Show thumbnails for available themes.
-# As html img tags here, so we can add links on them.
-cols = st.beta_columns(len(THEMES))
-for col, theme in zip(cols, THEMES):
-
-    # Get repo name for this theme (to link to correct deployed app)-
-    if theme == "light":
-        repo = "theming-showcase"
-    else:
-        repo = f"theming-showcase-{theme}"
-
-    # Set border of current theme to red, otherwise black or white
-    if theme == CURRENT_THEME:
-        border_color = "red"
-    else:
-        border_color = "lightgrey" if IS_DARK_THEME else "black"
-
-    col.markdown(
-        #f'<p align=center><a href="https://share.streamlit.io/{GITHUB_OWNER}/{repo}/main"><img style="border: 1px solid {border_color}" alt="{theme}" src="https://raw.githubusercontent.com/{GITHUB_OWNER}/theming-showcase/main/thumbnails/{theme}.png" width=150></a></p>',
-        f'<p align=center><a href="https://apps.streamlitusercontent.com/{GITHUB_OWNER}/{repo}/main/streamlit_app.py/+/"><img style="border: 1px solid {border_color}" alt="{theme}" src="https://raw.githubusercontent.com/{GITHUB_OWNER}/theming-showcase/main/thumbnails/{theme}.png" width=150></a></p>',
-        unsafe_allow_html=True,
-    )
-    if theme in ["light", "dark"]:
-        theme_descriptor = theme.capitalize() + " theme"
-    else:
-        theme_descriptor = "Custom theme"
-    col.write(f"<p align=center>{theme_descriptor}</p>", unsafe_allow_html=True)
-
-
-""
-with st.beta_expander("Not loading?"):
-    st.write(
-        "You probably played around with themes before and overrode this app's theme. Go to ☰ -> Settings -> Theme and select *Custom Theme*."
-    )
-with st.beta_expander("How can I use this theme in my app?"):
-    st.write(EXPANDER_TEXT)
-
-""
-""
-
-
+CURRENT_THEME = "blue"
+IS_DARK_THEME = True
 dfTickerData = None
+
 def GetTickerData():
     dfData = None
     try:
@@ -99,79 +30,130 @@ def drawSidebar(
     key,
     plot=False,
 ):
-    st.write(
-        """
-        # Analyze Tickers
-        
-        Please select the Tickers below for analysis 👀 
-    
-        ```python
-        # First some code.
-        streamlit = "cool"
-        theming = "fantastic"
-        both = "💥"
-        ```
-        """
-    )
-    dfTickerData = GetTickerData()
-    #print(dfTickerData)
-    st.table(dfTickerData)
-    st.checkbox("Is this cool or what?", key=key)
-    st.radio(
-        "How many balloons?",
-        ["1 balloon 🎈", "2 balloons 🎈🎈", "3 balloons 🎈🎈🎈"],
-        key=key,
-    )
-    st.button("🤡 Click me", key=key)
+    st.write("Fun and educative Stock Analysis!")
 
-    # if plot:
-    #     st.write("Oh look, a plot:")
-    #     x1 = np.random.randn(200) - 2
-    #     x2 = np.random.randn(200)
-    #     x3 = np.random.randn(200) + 2
-
-    #     hist_data = [x1, x2, x3]
-    #     group_labels = ["Group 1", "Group 2", "Group 3"]
-
-    #     fig = ff.create_distplot(hist_data, group_labels, bin_size=[0.1, 0.25, 0.5])
-
-    #     st.plotly_chart(fig, use_container_width=True)
-
-    st.file_uploader("You can now upload with style", key=key)
-    st.slider(
-        "From 10 to 11, how cool are themes?", min_value=10, max_value=11, key=key
-    )
-    # st.select_slider("Pick a number", [1, 2, 3], key=key)
-    st.number_input("So many numbers", key=key)
-    st.text_area("A little writing space for you :)", key=key)
-    st.selectbox(
-        "My favorite thing in the world is...",
-        ["Streamlit", "Theming", "Baloooons 🎈 "],
-        key=key,
-    )
-    # st.multiselect("Pick a number", [1, 2, 3], key=key)
-    # st.color_picker("Colors, colors, colors", key=key)
-    with st.beta_expander("Expand me!"):
-        st.write("Hey there! Nothing to see here 👀 ")
-    st.write("")
-    # st.write("That's our progress on theming:")
-    # st.progress(0.99)
-    if plot:
-        st.write("And here's some data and plots")
-        st.json({"data": [1, 2, 3, 4]})
-        st.dataframe({"data": [1, 2, 3, 4]})
-        st.table({"data": [1, 2, 3, 4]})
-        st.line_chart({"data": [1, 2, 3, 4]})
-        # st.help(st.write)
-    st.write("This is the end. Have fun building themes!")
 
 def drawMain(key, plot=False,):
-    tabTickers, tab1, tab2, tab3 = st.tabs(["Tickers", "Cat", "Dog", "Owl"])
+    tabTickers, tabThemes, tabHeader, tab1, tab2, tab3, tabPlots = st.tabs(["Tickers", 'Themes', 'Header', "Tab1", "Tab2", "Tab3", 'Plots'])
     with tabTickers:
+        st.header("Analyze Tickers")       
+        dfTickerData = GetTickerData()
+        #print(dfTickerData)
+        st.table(dfTickerData)
+    with tabThemes:
+        THEMES = [
+            "light",
+            "dark",
+            "green",
+            "blue",
+        ]
+        GITHUB_OWNER = "streamlit"
+        EXPANDER_TEXT = """
+            This is a custom theme. You can enable it by copying the following code
+            to `.streamlit/config.toml`:
+
+            ```python
+            [theme]
+            primaryColor = "#E694FF"
+            backgroundColor = "#00172B"
+            secondaryBackgroundColor = "#0083B8"
+            textColor = "#C6CDD4"
+            font = "sans-serif"
+            ```
+            """
+
+        # Show thumbnails for available themes.
+        # As html img tags here, so we can add links on them.
+        cols = st.beta_columns(len(THEMES))
+        for col, theme in zip(cols, THEMES):
+
+            # Get repo name for this theme (to link to correct deployed app)-
+            if theme == "light":
+                repo = "theming-showcase"
+            else:
+                repo = f"theming-showcase-{theme}"
+
+            # Set border of current theme to red, otherwise black or white
+            if theme == CURRENT_THEME:
+                border_color = "red"
+            else:
+                border_color = "lightgrey" if IS_DARK_THEME else "black"
+
+            col.markdown(
+                #f'<p align=center><a href="https://share.streamlit.io/{GITHUB_OWNER}/{repo}/main"><img style="border: 1px solid {border_color}" alt="{theme}" src="https://raw.githubusercontent.com/{GITHUB_OWNER}/theming-showcase/main/thumbnails/{theme}.png" width=150></a></p>',
+                f'<p align=center><a href="https://apps.streamlitusercontent.com/{GITHUB_OWNER}/{repo}/main/streamlit_app.py/+/"><img style="border: 1px solid {border_color}" alt="{theme}" src="https://raw.githubusercontent.com/{GITHUB_OWNER}/theming-showcase/main/thumbnails/{theme}.png" width=150></a></p>',
+                unsafe_allow_html=True,
+            )
+            if theme in ["light", "dark"]:
+                theme_descriptor = theme.capitalize() + " theme"
+            else:
+                theme_descriptor = "Custom theme"
+            col.write(f"<p align=center>{theme_descriptor}</p>", unsafe_allow_html=True)
+
+
+        ""
+        with st.beta_expander("Not loading?"):
+            st.write(
+                "You probably played around with themes before and overrode this app's theme. Go to ☰ -> Settings -> Theme and select *Custom Theme*."
+            )
+        with st.beta_expander("How can I use this theme in my app?"):
+            st.write(EXPANDER_TEXT)
+
+        ""
+        ""
+    with tabHeader:
+        # This code is different for each deployed app.
+        st.image(
+            "https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/240/apple/271/artist-palette_1f3a8.png",
+            width=100,
+        )
+    with tab1:
+        st.header("A cat")
+        st.image("https://static.streamlit.io/examples/cat.jpg", width=200)
+    with tab2:
+        st.header("A dog")
+        st.image("https://static.streamlit.io/examples/dog.jpg", width=200)
+        st.checkbox("Is this cool or what?", key=key)
+        st.radio(
+            "How many balloons?",
+            ["1 balloon 🎈", "2 balloons 🎈🎈", "3 balloons 🎈🎈🎈"],
+            key=key,
+        )
+        st.button("🤡 Click me", key=key)
+    with tab3:
+        st.header("An owl")
+        st.image("https://static.streamlit.io/examples/owl.jpg", width=200)
+        st.file_uploader("You can now upload with style", key=key)
+        st.slider(
+            "From 10 to 11, how cool are themes?", min_value=10, max_value=11, key=key
+        )
+        # st.select_slider("Pick a number", [1, 2, 3], key=key)
+        st.number_input("So many numbers", key=key)
+        st.text_area("A little writing space for you :)", key=key)
+        st.selectbox(
+            "My favorite thing in the world is...",
+            ["Streamlit", "Theming", "Baloooons 🎈 "],
+            key=key,
+        )
+        # st.multiselect("Pick a number", [1, 2, 3], key=key)
+        # st.color_picker("Colors, colors, colors", key=key)
+        with st.beta_expander("Expand me!"):
+            st.write("Hey there! Nothing to see here 👀 ")
+        st.write("")
+        # st.write("That's our progress on theming:")
+        # st.progress(0.99)
+        if plot:
+            st.write("And here's some data and plots")
+            st.json({"data": [1, 2, 3, 4]})
+            st.dataframe({"data": [1, 2, 3, 4]})
+            st.table({"data": [1, 2, 3, 4]})
+            st.line_chart({"data": [1, 2, 3, 4]})
+            # st.help(st.write)
+        st.write("This is the end. Have fun building themes!")
+    with tabPlots:
         st.write(
             """
-            # Analyze Tickers
-            
+           
             Please select the Tickers below for analysis 👀 
         
             ```python
@@ -182,74 +164,23 @@ def drawMain(key, plot=False,):
             ```
             """
         )
-        dfTickerData = GetTickerData()
-        #print(dfTickerData)
-        st.table(dfTickerData)
+    
+        # if plot:
+        #     st.write("Oh look, a plot:")
+        #     x1 = np.random.randn(200) - 2
+        #     x2 = np.random.randn(200)
+        #     x3 = np.random.randn(200) + 2
 
-    with tab1:
-        st.header("A cat")
-        st.image("https://static.streamlit.io/examples/cat.jpg", width=200)
+        #     hist_data = [x1, x2, x3]
+        #     group_labels = ["Group 1", "Group 2", "Group 3"]
 
-    with tab2:
-        st.header("A dog")
-        st.image("https://static.streamlit.io/examples/dog.jpg", width=200)
+        #     fig = ff.create_distplot(hist_data, group_labels, bin_size=[0.1, 0.25, 0.5])
 
-    with tab3:
-        st.header("An owl")
-        st.image("https://static.streamlit.io/examples/owl.jpg", width=200)
-
-    st.checkbox("Is this cool or what?", key=key)
-    st.radio(
-        "How many balloons?",
-        ["1 balloon 🎈", "2 balloons 🎈🎈", "3 balloons 🎈🎈🎈"],
-        key=key,
-    )
-    st.button("🤡 Click me", key=key)
-
-    # if plot:
-    #     st.write("Oh look, a plot:")
-    #     x1 = np.random.randn(200) - 2
-    #     x2 = np.random.randn(200)
-    #     x3 = np.random.randn(200) + 2
-
-    #     hist_data = [x1, x2, x3]
-    #     group_labels = ["Group 1", "Group 2", "Group 3"]
-
-    #     fig = ff.create_distplot(hist_data, group_labels, bin_size=[0.1, 0.25, 0.5])
-
-    #     st.plotly_chart(fig, use_container_width=True)
-
-    st.file_uploader("You can now upload with style", key=key)
-    st.slider(
-        "From 10 to 11, how cool are themes?", min_value=10, max_value=11, key=key
-    )
-    # st.select_slider("Pick a number", [1, 2, 3], key=key)
-    st.number_input("So many numbers", key=key)
-    st.text_area("A little writing space for you :)", key=key)
-    st.selectbox(
-        "My favorite thing in the world is...",
-        ["Streamlit", "Theming", "Baloooons 🎈 "],
-        key=key,
-    )
-    # st.multiselect("Pick a number", [1, 2, 3], key=key)
-    # st.color_picker("Colors, colors, colors", key=key)
-    with st.beta_expander("Expand me!"):
-        st.write("Hey there! Nothing to see here 👀 ")
-    st.write("")
-    # st.write("That's our progress on theming:")
-    # st.progress(0.99)
-    if plot:
-        st.write("And here's some data and plots")
-        st.json({"data": [1, 2, 3, 4]})
-        st.dataframe({"data": [1, 2, 3, 4]})
-        st.table({"data": [1, 2, 3, 4]})
-        st.line_chart({"data": [1, 2, 3, 4]})
-        # st.help(st.write)
-    st.write("This is the end. Have fun building themes!")
+        #     st.plotly_chart(fig, use_container_width=True)
+        st.header("Sample Plots")
 
 
 drawMain("main", plot=True)
-
 
 
 with st.sidebar:
