@@ -83,17 +83,19 @@ with st.beta_expander("How can I use this theme in my app?"):
 ""
 ""
 
+
 dfTickerData = None
 def GetTickerData():
+    dfData = None
     try:
-        dfTickerData = pd.read_csv('Tickers.csv')
+        dfData = pd.read_csv('Tickers.csv')
         st.write("## THE DATA BEING USED")
-    except:
-        print("Error in Loading Image Tickers.csv")
-
+    except Exception as ex:
+        print(f"Error in Loading Tickers.csv {ex}")
+    return dfData
 
 # Draw some dummy content in main page and sidebar.
-def draw_all(
+def drawSidebar(
     key,
     plot=False,
 ):
@@ -111,7 +113,8 @@ def draw_all(
         ```
         """
     )
-    print(dfTickerData)
+    dfTickerData = GetTickerData()
+    #print(dfTickerData)
     st.table(dfTickerData)
     st.checkbox("Is this cool or what?", key=key)
     st.radio(
@@ -162,8 +165,92 @@ def draw_all(
         # st.help(st.write)
     st.write("This is the end. Have fun building themes!")
 
+def drawMain(key, plot=False,):
+    tabTickers, tab1, tab2, tab3 = st.tabs(["Tickers", "Cat", "Dog", "Owl"])
+    with tabTickers:
+        st.write(
+            """
+            # Analyze Tickers
+            
+            Please select the Tickers below for analysis 👀 
+        
+            ```python
+            # First some code.
+            streamlit = "cool"
+            theming = "fantastic"
+            both = "💥"
+            ```
+            """
+        )
+        dfTickerData = GetTickerData()
+        #print(dfTickerData)
+        st.table(dfTickerData)
 
-draw_all("main", plot=True)
+    with tab1:
+        st.header("A cat")
+        st.image("https://static.streamlit.io/examples/cat.jpg", width=200)
+
+    with tab2:
+        st.header("A dog")
+        st.image("https://static.streamlit.io/examples/dog.jpg", width=200)
+
+    with tab3:
+        st.header("An owl")
+        st.image("https://static.streamlit.io/examples/owl.jpg", width=200)
+
+    st.checkbox("Is this cool or what?", key=key)
+    st.radio(
+        "How many balloons?",
+        ["1 balloon 🎈", "2 balloons 🎈🎈", "3 balloons 🎈🎈🎈"],
+        key=key,
+    )
+    st.button("🤡 Click me", key=key)
+
+    # if plot:
+    #     st.write("Oh look, a plot:")
+    #     x1 = np.random.randn(200) - 2
+    #     x2 = np.random.randn(200)
+    #     x3 = np.random.randn(200) + 2
+
+    #     hist_data = [x1, x2, x3]
+    #     group_labels = ["Group 1", "Group 2", "Group 3"]
+
+    #     fig = ff.create_distplot(hist_data, group_labels, bin_size=[0.1, 0.25, 0.5])
+
+    #     st.plotly_chart(fig, use_container_width=True)
+
+    st.file_uploader("You can now upload with style", key=key)
+    st.slider(
+        "From 10 to 11, how cool are themes?", min_value=10, max_value=11, key=key
+    )
+    # st.select_slider("Pick a number", [1, 2, 3], key=key)
+    st.number_input("So many numbers", key=key)
+    st.text_area("A little writing space for you :)", key=key)
+    st.selectbox(
+        "My favorite thing in the world is...",
+        ["Streamlit", "Theming", "Baloooons 🎈 "],
+        key=key,
+    )
+    # st.multiselect("Pick a number", [1, 2, 3], key=key)
+    # st.color_picker("Colors, colors, colors", key=key)
+    with st.beta_expander("Expand me!"):
+        st.write("Hey there! Nothing to see here 👀 ")
+    st.write("")
+    # st.write("That's our progress on theming:")
+    # st.progress(0.99)
+    if plot:
+        st.write("And here's some data and plots")
+        st.json({"data": [1, 2, 3, 4]})
+        st.dataframe({"data": [1, 2, 3, 4]})
+        st.table({"data": [1, 2, 3, 4]})
+        st.line_chart({"data": [1, 2, 3, 4]})
+        # st.help(st.write)
+    st.write("This is the end. Have fun building themes!")
+
+
+drawMain("main", plot=True)
+
+
 
 with st.sidebar:
-    draw_all("sidebar")
+    drawSidebar("sidebar")
