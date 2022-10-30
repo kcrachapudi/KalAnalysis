@@ -225,9 +225,38 @@ def drawMain(key, plot=False,):
         try:
             if(ticker is not None):
                 st.header(f"Ticker {ticker} Data")       
+                gb1 = GridOptionsBuilder.from_dataframe(dfTicker)
+                gb1.configure_pagination(paginationAutoPageSize=True) #Add pagination
+                gb1.configure_side_bar() #Add a sidebar
+                gb1.configure_selection('multiple', use_checkbox=True, groupSelectsChildren="Group checkbox select children") #Enable multi-row selection
+                gridOptions1 = gb1.build()
+
+                grid_response1 = AgGrid(
+                    dfTicker,
+                    gridOptions=gridOptions1,
+                    data_return_mode='AS_INPUT', 
+                    update_mode='MODEL_CHANGED', 
+                    fit_columns_on_grid_load=False,
+                    #theme='blue', #Add theme color to the table
+                    enable_enterprise_modules=True,
+                    height=350, 
+                    width='100%',
+                    reload_data=True
+                )
+
+                data = grid_response['data']
+                selected1 = grid_response1['selected_rows'] 
+                dfSelected1 = pd.DataFrame(selected1) #Pass the selected rows to a new dataframe df    
+        except:    
+            st.write(f"Ticker not selected")       
+    with tabSADetails2:
+        try:
+            if(ticker is not None):
+                st.header(f"Ticker {ticker} Data")       
                 st.table(dfTicker)
         except:    
             st.write(f"Ticker not selected")       
+
 
 drawMain("main", plot=True)
 
