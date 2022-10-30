@@ -1,7 +1,10 @@
 import pandas as pd
 import yfinance as yf
 
-def download_yfinance_data(tickers):
+def GetTickersData(tickers):
+    return GetYFinanceData(tickers)
+
+def GetYFinanceData(tickers):
     DataFrame: df_Data
     #data = yf.download(tickers[0], start="2017-01-01", end="2017-04-30")
 
@@ -40,5 +43,5 @@ def download_yfinance_data(tickers):
             #proxy = None
         )
     #Filter Out Other Columns and return only 'Close'
-    df_Data = df_Data[['Close']]
+    #df_Data = df_Data[['Close']]
     return df_Data

@@ -2,8 +2,8 @@ import streamlit as st
 import plotly.figure_factory as ff
 import pandas as pd
 import numpy as np
-
-
+from st_aggrid import GridOptionsBuilder, AgGrid, GridUpdateMode, DataReturnMode
+import main
 
 """
 # KalAnalysis.com!
@@ -14,9 +14,10 @@ Comprehensive AI based Quant Stock Analysis to empower Users to make informed Tr
 
 CURRENT_THEME = "blue"
 IS_DARK_THEME = True
-dfTickerData = None
+dfTickers = None
+dfTicker = None
 
-def GetTickerData():
+def GetTickersData():
     dfData = None
     try:
         dfData = pd.read_csv('Tickers.csv')
@@ -34,12 +35,37 @@ def drawSidebar(
 
 
 def drawMain(key, plot=False,):
-    tabTickers, tabThemes, tabHeader, tab1, tab2, tab3, tabPlots = st.tabs(["Tickers", 'Themes', 'Header', "Tab1", "Tab2", "Tab3", 'Plots'])
+    tabTickers, tabTickers2, tabThemes, tabHeader, tab1, tab2, tab3, tabPlots = st.tabs(["Tickers", "Tickers2", 'Themes', 'Header', "Tab1", "Tab2", "Tab3", 'Plots'])
+    dfSelected = None
     with tabTickers:
+        dfTickers = GetTickersData()
+        #AgGrid(dfTickerData)
+
+        gb = GridOptionsBuilder.from_dataframe(dfTickers)
+        gb.configure_pagination(paginationAutoPageSize=True) #Add pagination
+        gb.configure_side_bar() #Add a sidebar
+        gb.configure_selection('multiple', use_checkbox=True, groupSelectsChildren="Group checkbox select children") #Enable multi-row selection
+        gridOptions = gb.build()
+
+        grid_response = AgGrid(
+            dfTickers,
+            gridOptions=gridOptions,
+            data_return_mode='AS_INPUT', 
+            update_mode='MODEL_CHANGED', 
+            fit_columns_on_grid_load=False,
+            #theme='blue', #Add theme color to the table
+            enable_enterprise_modules=True,
+            height=350, 
+            width='100%',
+            reload_data=True
+        )
+
+        data = grid_response['data']
+        selected = grid_response['selected_rows'] 
+        dfSelected = pd.DataFrame(selected) #Pass the selected rows to a new dataframe df    
+    with tabTickers2:
         st.header("Analyze Tickers")       
-        dfTickerData = GetTickerData()
-        #print(dfTickerData)
-        st.table(dfTickerData)
+        st.table(dfTickers)
     with tabThemes:
         THEMES = [
             "light",
@@ -179,9 +205,31 @@ def drawMain(key, plot=False,):
         #     st.plotly_chart(fig, use_container_width=True)
         st.header("Sample Plots")
 
+    st.header("Selected Ticker")       
+    if(dfSelected is not None):
+        try:
+            print(dfSelected)
+            st.table(dfSelected)
+            ticker = dfSelected['Ticker'].iloc[0]
+        except:
+            pass
+
+    if st.button('Analyze Ticker'):
+        st.write(f'Analyzing... {ticker} ')
+        if(ticker is not None):
+            dfTicker = main.GetTickerData(ticker)
+
+    st.header("Symbol Analysis - SA")       
+    tabSADetails, tabSADetails2, tabSADetails3, tabSADetails4, tabSADetails5 = st.tabs(["Symbol Details", "SA2", 'SA3', 'SA4', "SA5"])
+    with tabSADetails:
+        try:
+            if(ticker is not None):
+                st.header(f"Ticker {ticker} Data")       
+                st.table(dfTicker)
+        except:    
+            st.write(f"Ticker not selected")       
 
 drawMain("main", plot=True)
-
 
 with st.sidebar:
     drawSidebar("sidebar")

@@ -59,10 +59,27 @@ def SetupTickerDataFrame():
     return dfTickers
 
 
-def download_etf_data(dfTickers):
+def SetupSymbolDataFrame(dfSymbol):
+    if(dfSymbol is not None):
+        #Create a DataFrame with empty values for other columns for now
+        #Once Analysis starts these columns will be populated with data
+        dfSymbol['AverageAnnualReturn'] = ''
+        dfSymbol['AnnualStandardDeviation'] = ''
+        dfSymbol['Annual_Return'] = ''
+        dfSymbol['Risk_Profile'] = ''
+        dfSymbol['SharpeRatio']=''
+    return dfSymbol
+
+
+def GetTickersData(dfTickers):
     #Provide the Tickers dataframe so that the data can be downloaded from YFinance
-    return cloud_data_collector.download_yfinance_data(dfTickers)
+    return cloud_data_collector.GetTickersData(dfTickers['Ticker'])
     
+
+def GetTickerData(symbol):
+    #Provide the Ticker Symbol so that the data can be downloaded from YFinance
+    return cloud_data_collector.GetTickersData(symbol)
+
 
 def save_etf_data(dfTickers, dfData):
     # Get  the Ticker Data and Save it locally for analysis
