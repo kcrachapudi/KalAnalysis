@@ -73,12 +73,18 @@ def SetupSymbolDataFrame(dfSymbol):
 
 def GetTickersData(dfTickers):
     #Provide the Tickers dataframe so that the data can be downloaded from YFinance
-    return cloud_data_collector.GetTickersData(dfTickers['Ticker'])
+    df =  cloud_data_collector.GetTickersData(dfTickers['Ticker'])
+    #df.reset_index(inplace=True)
+    #df['Date'] = pd.to_datetime(df['Date']).dt.normalize()
+    return df
     
 
 def GetTickerData(symbol):
     #Provide the Ticker Symbol so that the data can be downloaded from YFinance
-    return cloud_data_collector.GetTickersData(symbol)
+    df = cloud_data_collector.GetTickersData(symbol)
+    #df.reset_index(inplace=True)
+    #df['Date'] = pd.to_datetime(df['Date']).dt.normalize()
+    return df
 
 
 def save_etf_data(dfTickers, dfData):
@@ -164,7 +170,7 @@ def Init():
     #If canDownload flag is true then go ahead with downloading fresh data from YFinance
     if(canDownload):
         #Download happens here
-        dfData = download_etf_data(tickers)
+        dfData = GetTickersData(tickers)
         #Saving the downloaded data to CSVs happens here
         save_etf_data(dfTickers, dfData)
         Utils.save_download_details()

@@ -218,6 +218,8 @@ def drawMain(key, plot=False,):
         st.write(f'Analyzing... {ticker} ')
         if(ticker is not None):
             dfTicker = main.GetTickerData(ticker)
+            dfTicker.index.name = 'Date'
+            dfTickerGrid = dfTicker.reset_index()
 
     st.header("Symbol Analysis - SA")       
     tabSADetails, tabSADetails2, tabSADetails3, tabSADetails4, tabSADetails5 = st.tabs(["Symbol Details", "SA2", 'SA3', 'SA4', "SA5"])
@@ -225,14 +227,15 @@ def drawMain(key, plot=False,):
         try:
             if(ticker is not None):
                 st.header(f"Ticker {ticker} Data")       
-                gb1 = GridOptionsBuilder.from_dataframe(dfTicker)
+                gb1 = GridOptionsBuilder.from_dataframe(dfTickerGrid)
                 gb1.configure_pagination(paginationAutoPageSize=True) #Add pagination
                 gb1.configure_side_bar() #Add a sidebar
                 gb1.configure_selection('multiple', use_checkbox=True, groupSelectsChildren="Group checkbox select children") #Enable multi-row selection
+                gb1.configure_column("Date", type=["customDateTimeFormat"], custom_format_string='yyyy-MM-dd')
                 gridOptions1 = gb1.build()
 
                 grid_response1 = AgGrid(
-                    dfTicker,
+                    dfTickerGrid,
                     gridOptions=gridOptions1,
                     data_return_mode='AS_INPUT', 
                     update_mode='MODEL_CHANGED', 
@@ -244,7 +247,7 @@ def drawMain(key, plot=False,):
                     reload_data=True
                 )
 
-                data = grid_response['data']
+                data = grid_response1['data']
                 selected1 = grid_response1['selected_rows'] 
                 dfSelected1 = pd.DataFrame(selected1) #Pass the selected rows to a new dataframe df    
         except:    
