@@ -222,7 +222,7 @@ def drawMain(key, plot=False,):
             dfTickerGrid = dfTicker.reset_index()
 
     st.header("Symbol Analysis - SA")       
-    tabSADetails, tabSADetails2, tabSADetails3, tabSADetails4, tabSADetails5 = st.tabs(["Symbol Details", "SA2", 'SA3', 'SA4', "SA5"])
+    tabSADetails, tabSADetailsRaw = st.tabs(["Symbol Details", "Raw Details"])
     with tabSADetails:
         try:
             if(ticker is not None):
@@ -252,7 +252,7 @@ def drawMain(key, plot=False,):
                 dfSelected1 = pd.DataFrame(selected1) #Pass the selected rows to a new dataframe df    
         except:    
             st.write(f"Ticker not selected")       
-    with tabSADetails2:
+    with tabSADetailsRaw:
         try:
             if(ticker is not None):
                 st.header(f"Ticker {ticker} Data")       
