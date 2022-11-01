@@ -71,26 +71,33 @@ def SetupSymbolDataFrame(dfSymbol):
     return dfSymbol
 
 
-def GetTickersData(dfTickers):
-    #Provide the Tickers dataframe so that the data can be downloaded from YFinance
-    df =  cloud_data_collector.GetTickersData(dfTickers['Ticker'])
-    #df.reset_index(inplace=True)
-    #df['Date'] = pd.to_datetime(df['Date']).dt.normalize()
-    return df
-    
+def GetTickersData(lstTickers):
+    #The download details from YFinance are captured and get the download date
+    download_date = Utils.get_download_details()
+    canDownload = False
+    #Do a check to see if the data was downloaded today, if yes skip downloading again as the close prices will not change for today again
+    #But if the downloaded data is stale then set the flag to can download to true
+    if( isinstance(download_date, datetime.date)):
+        if(download_date<datetime.date.today()):
+            canDownload = True
+    else:
+        canDownload = True
+    #If canDownload flag is true then go ahead with downloading fresh data from YFinance
+    if(canDownload):
+        #Download happens here
+        #Provide the Tickers List to download from YFinance
+        dfData = cloud_data_collector.GetTickersData(lstTickers)
+        #Saving the downloaded data to CSVs happens here
+        SaveTickersDownloadedData(lstTickers, dfData)
+        Utils.save_download_details()
+    return dfData
+   
 
-def GetTickerData(symbol):
-    #Provide the Ticker Symbol so that the data can be downloaded from YFinance
-    df = cloud_data_collector.GetTickersData(symbol)
-    #df.reset_index(inplace=True)
-    #df['Date'] = pd.to_datetime(df['Date']).dt.normalize()
-    return df
-
-
-def save_etf_data(dfTickers, dfData):
+def SaveTickersDownloadedData(lstTickers, dfData):
     # Get  the Ticker Data and Save it locally for analysis
     # Saving the daily close data and generate and save daily return data as csv
-    for ticker in dfTickers['Symbol'].tolist():
+    for ticker in lstTickers:
+        print(dfData)
         dfTicker = dfData['Close'][ticker]
         Utils.generate_daily_close(ticker, dfTicker)
         Utils.generate_daily_return(ticker)

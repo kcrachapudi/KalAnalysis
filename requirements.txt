@@ -3,8 +3,6 @@ aiohttp==3.8.1
 aiosignal==1.2.0
 alabaster @ file:///home/ktietz/src/ci/alabaster_1611921544520/work
 alpaca-trade-api==2.1.0
-anaconda-client @ file:///C:/ci/anaconda-client_1635342725944/work
-anaconda-project @ file:///tmp/build/80754af9/anaconda-project_1637161053845/work
 anyio @ file:///C:/ci/anyio_1644481921011/work/dist
 appdirs==1.4.4
 argh==0.26.2
@@ -50,11 +48,6 @@ cmdstanpy==0.9.68
 colorama @ file:///tmp/build/80754af9/colorama_1607707115595/work
 colorcet==3.0.0
 comtypes==1.1.10
-conda==4.13.0
-conda-content-trust @ file:///tmp/build/80754af9/conda-content-trust_1617045594566/work
-conda-pack @ file:///tmp/build/80754af9/conda-pack_1611163042455/work
-conda-package-handling @ file:///C:/ci/conda-package-handling_1618262410900/work
-conda-token @ file:///tmp/build/80754af9/conda-token_1620076980546/work
 contextlib2 @ file:///Users/ktietz/demo/mc3/conda-bld/contextlib2_1630668244042/work
 convertdate @ file:///home/conda/feedstock_root/build_artifacts/convertdate_1642883757836/work
 cookiecutter @ file:///tmp/build/80754af9/cookiecutter_1617748928239/work

@@ -14,10 +14,16 @@ Comprehensive AI based Quant Stock Analysis to empower Users to make informed Tr
 
 CURRENT_THEME = "blue"
 IS_DARK_THEME = True
+
+dfTickersList = None
 dfTickers = None
 dfTicker = None
+dfTickersGrid = None 
 
-def GetTickersData():
+if 'dfSelected' not in st.session_state:
+    st.session_state.dfSelected = None
+
+def GetTickersFromCSV():
     dfData = None
     try:
         dfData = pd.read_csv('Tickers.csv')
@@ -36,19 +42,18 @@ def drawSidebar(
 
 def drawMain(key, plot=False,):
     tabTickers, tabTickers2, tabThemes, tabHeader, tab1, tab2, tab3, tabPlots = st.tabs(["Tickers", "Tickers2", 'Themes', 'Header', "Tab1", "Tab2", "Tab3", 'Plots'])
-    dfSelected = None
     with tabTickers:
-        dfTickers = GetTickersData()
+        dfTickersList = GetTickersFromCSV()
         #AgGrid(dfTickerData)
 
-        gb = GridOptionsBuilder.from_dataframe(dfTickers)
+        gb = GridOptionsBuilder.from_dataframe(dfTickersList)
         gb.configure_pagination(paginationAutoPageSize=True) #Add pagination
         gb.configure_side_bar() #Add a sidebar
         gb.configure_selection('multiple', use_checkbox=True, groupSelectsChildren="Group checkbox select children") #Enable multi-row selection
         gridOptions = gb.build()
 
         grid_response = AgGrid(
-            dfTickers,
+            dfTickersList,
             gridOptions=gridOptions,
             data_return_mode='AS_INPUT', 
             update_mode='MODEL_CHANGED', 
@@ -59,13 +64,19 @@ def drawMain(key, plot=False,):
             width='100%',
             reload_data=True
         )
-
         data = grid_response['data']
         selected = grid_response['selected_rows'] 
-        dfSelected = pd.DataFrame(selected) #Pass the selected rows to a new dataframe df    
+        dfSelectedx = pd.DataFrame(selected) #Pass the selected rows to a new dataframe df   
+        if(st.session_state.dfSelected is None):
+            st.session_state.dfSelected = dfSelectedx.copy()
+        else:
+            st.session_state.dfSelected.append(dfSelectedx.copy()) 
+        st.write(st.session_state)
+
+
     with tabTickers2:
         st.header("Analyze Tickers")       
-        st.table(dfTickers)
+        st.table(dfTickersList)
     with tabThemes:
         THEMES = [
             "light",
@@ -136,45 +147,35 @@ def drawMain(key, plot=False,):
     with tab1:
         st.header("A cat")
         st.image("https://static.streamlit.io/examples/cat.jpg", width=200)
-    with tab2:
-        st.header("A dog")
-        st.image("https://static.streamlit.io/examples/dog.jpg", width=200)
-        st.checkbox("Is this cool or what?", key=key)
-        st.radio(
-            "How many balloons?",
-            ["1 balloon 🎈", "2 balloons 🎈🎈", "3 balloons 🎈🎈🎈"],
-            key=key,
-        )
-        st.button("🤡 Click me", key=key)
     with tab3:
-        st.header("An owl")
-        st.image("https://static.streamlit.io/examples/owl.jpg", width=200)
-        st.file_uploader("You can now upload with style", key=key)
-        st.slider(
-            "From 10 to 11, how cool are themes?", min_value=10, max_value=11, key=key
-        )
-        # st.select_slider("Pick a number", [1, 2, 3], key=key)
-        st.number_input("So many numbers", key=key)
-        st.text_area("A little writing space for you :)", key=key)
-        st.selectbox(
-            "My favorite thing in the world is...",
-            ["Streamlit", "Theming", "Baloooons 🎈 "],
-            key=key,
-        )
-        # st.multiselect("Pick a number", [1, 2, 3], key=key)
-        # st.color_picker("Colors, colors, colors", key=key)
-        with st.beta_expander("Expand me!"):
-            st.write("Hey there! Nothing to see here 👀 ")
-        st.write("")
-        # st.write("That's our progress on theming:")
-        # st.progress(0.99)
-        if plot:
-            st.write("And here's some data and plots")
-            st.json({"data": [1, 2, 3, 4]})
-            st.dataframe({"data": [1, 2, 3, 4]})
-            st.table({"data": [1, 2, 3, 4]})
-            st.line_chart({"data": [1, 2, 3, 4]})
-            # st.help(st.write)
+        # st.header("An owl")
+        # st.image("https://static.streamlit.io/examples/owl.jpg", width=200)
+        # st.file_uploader("You can now upload with style", key=key)
+        # st.slider(
+        #     "From 10 to 11, how cool are themes?", min_value=10, max_value=11, key=key
+        # )
+        # # st.select_slider("Pick a number", [1, 2, 3], key=key)
+        # st.number_input("So many numbers", key=key)
+        # st.text_area("A little writing space for you :)", key=key)
+        # st.selectbox(
+        #     "My favorite thing in the world is...",
+        #     ["Streamlit", "Theming", "Baloooons 🎈 "],
+        #     key=key,
+        # )
+        # # st.multiselect("Pick a number", [1, 2, 3], key=key)
+        # # st.color_picker("Colors, colors, colors", key=key)
+        # with st.beta_expander("Expand me!"):
+        #     st.write("Hey there! Nothing to see here 👀 ")
+        # st.write("")
+        # # st.write("That's our progress on theming:")
+        # # st.progress(0.99)
+        # if plot:
+        #     st.write("And here's some data and plots")
+        #     st.json({"data": [1, 2, 3, 4]})
+        #     st.dataframe({"data": [1, 2, 3, 4]})
+        #     st.table({"data": [1, 2, 3, 4]})
+        #     st.line_chart({"data": [1, 2, 3, 4]})
+        #     # st.help(st.write)
         st.write("This is the end. Have fun building themes!")
     with tabPlots:
         st.write(
@@ -205,29 +206,29 @@ def drawMain(key, plot=False,):
         #     st.plotly_chart(fig, use_container_width=True)
         st.header("Sample Plots")
 
-    st.header("Selected Ticker")       
-    if(dfSelected is not None):
+    st.header("Selected Tickers")       
+    if(st.session_state.dfSelected is not None):
         try:
-            print(dfSelected)
-            st.table(dfSelected)
-            ticker = dfSelected['Ticker'].iloc[0]
+            st.table(st.session_state.dfSelected)
+            ticker = st.session_state.dfSelected['Ticker'].iloc[0]
         except:
             pass
 
-    if st.button('Analyze Ticker'):
-        st.write(f'Analyzing... {ticker} ')
-        if(ticker is not None):
-            dfTicker = main.GetTickerData(ticker)
-            dfTicker.index.name = 'Date'
-            dfTickerGrid = dfTicker.reset_index()
+    if st.button('Download Tickers Data'):
+        st.write(f'Downloading data for Selected Tickers')
+        # if(st.session_state.dfSelected is not None and len(st.session_state.dfSelected['Ticker'])>0):
+        #     selectedtickers = st.session_state.dfSelected["Ticker"].tolist()
+        #     dfTickers = main.GetTickersData(selectedtickers)
+        #     dfTickers.index.name = 'Date'
+        #     dfTickersGrid = dfTickers.reset_index()
 
     st.header("Symbol Analysis - SA")       
     tabSADetails, tabSADetailsRaw = st.tabs(["Symbol Details", "Raw Details"])
     with tabSADetails:
         try:
-            if(ticker is not None):
+            if(st.session_state.dfSelected is not None):
                 st.header(f"Ticker {ticker} Data")       
-                gb1 = GridOptionsBuilder.from_dataframe(dfTickerGrid)
+                gb1 = GridOptionsBuilder.from_dataframe(dfTickersGrid)
                 gb1.configure_pagination(paginationAutoPageSize=True) #Add pagination
                 gb1.configure_side_bar() #Add a sidebar
                 gb1.configure_selection('multiple', use_checkbox=True, groupSelectsChildren="Group checkbox select children") #Enable multi-row selection
@@ -235,7 +236,7 @@ def drawMain(key, plot=False,):
                 gridOptions1 = gb1.build()
 
                 grid_response1 = AgGrid(
-                    dfTickerGrid,
+                    dfTickersGrid,
                     gridOptions=gridOptions1,
                     data_return_mode='AS_INPUT', 
                     update_mode='MODEL_CHANGED', 
@@ -256,7 +257,7 @@ def drawMain(key, plot=False,):
         try:
             if(ticker is not None):
                 st.header(f"Ticker {ticker} Data")       
-                st.table(dfTicker)
+                st.table(dfTickers)
         except:    
             st.write(f"Ticker not selected")       
 
