@@ -71,7 +71,8 @@ def SetupSymbolDataFrame(dfSymbol):
     return dfSymbol
 
 
-def GetTickersData(lstTickers):
+def LoadTickersData(lstTickers):
+    dfData = None
     #The download details from YFinance are captured and get the download date
     download_date = Utils.get_download_details()
     canDownload = False
@@ -90,17 +91,20 @@ def GetTickersData(lstTickers):
         #Saving the downloaded data to CSVs happens here
         SaveTickersDownloadedData(lstTickers, dfData)
         Utils.save_download_details()
-    return dfData
    
 
 def SaveTickersDownloadedData(lstTickers, dfData):
     # Get  the Ticker Data and Save it locally for analysis
     # Saving the daily close data and generate and save daily return data as csv
     for ticker in lstTickers:
-        print(dfData)
-        dfTicker = dfData['Close'][ticker]
+        dfTicker = dfData[ticker]
+        print(dfTicker)
         Utils.generate_daily_close(ticker, dfTicker)
-        Utils.generate_daily_return(ticker)
+        #Utils.generate_daily_return(ticker)
+
+def GetTickerData(ticker):
+    return Utils.GetLocalTickerData(ticker)
+    
 
 
 def gather_customer_risk_input(risk_choices):

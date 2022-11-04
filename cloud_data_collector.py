@@ -1,16 +1,16 @@
 import pandas as pd
 import yfinance as yf
 
-def GetTickersData(tickers):
-    return GetYFinanceData(tickers)
+def GetTickersData(lstTickers):
+    return GetYFinanceData(lstTickers)
 
-def GetYFinanceData(tickers):
+def GetYFinanceData(lstTickers):
     DataFrame: df_Data
     #data = yf.download(tickers[0], start="2017-01-01", end="2017-04-30")
 
     df_Data = yf.download(  # or pdr.get_data_yahoo(...
             # tickers list or string as well
-            tickers = tickers,
+            tickers = lstTickers,
 
             # use "period" instead of start/end
             # valid periods: 1d,5d,1mo,3mo,6mo,1y,2y,5y,10y,ytd,max
@@ -24,7 +24,7 @@ def GetYFinanceData(tickers):
 
             # group by ticker (to access via data['SPY'])
             # (optional, default is 'column')
-            #group_by = 'ticker',
+            group_by = 'ticker',
 
             # adjust all OHLC automatically
             # (optional, default is False)

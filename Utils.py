@@ -18,7 +18,7 @@ def get_download_details():
         print(f'Error in getting Download date {ex}')            
     return download_date
 
-def get_ticker_close_data(ticker):
+def GetLocalTickerData(ticker):
     dfTickerData = None
     try:
         absdir = Path(__file__).parent.absolute()
@@ -26,7 +26,7 @@ def get_ticker_close_data(ticker):
         #print(f'Processing {csvreadname}')
         csvreadpath = Path(f'{absdir}/Daily_Close/{csvreadname}')
         dfTickerData = pd.read_csv(Path(csvreadpath), index_col='Date', parse_dates=True, infer_datetime_format=True)
-        dfTickerData.rename(columns = {ticker:'Close'}, inplace = True)
+        #dfTickerData.rename(columns = {ticker:'Close'}, inplace = True)
     except Exception as ex:
         print(f'Error in getting ticker close data for ticker {ticker}. Error is {ex}')            
     return dfTickerData
@@ -132,6 +132,15 @@ def generate_ticker_sharpe_ratio(ticker, numYears):
     sharpe_ratios.sort_values()
 
     return annual_average_returns[0], annual_standard_deviation[0], sharpe_ratios[0]
+
+
+def GetStringFromList(lstStrings):
+    strFinal = ""
+    if(lstStrings is not None and len(lstStrings)>0):
+        for str in lstStrings:
+            strFinal += str + ","
+        strFinal.removesuffix(",")
+    return strFinal
 
 def ConvertFloatToNumString(num):
     ret = 0.0
