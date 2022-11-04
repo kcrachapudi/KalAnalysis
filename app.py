@@ -4,6 +4,7 @@ import pandas as pd
 import numpy as np
 from st_aggrid import GridOptionsBuilder, AgGrid, GridUpdateMode, DataReturnMode
 import main
+import Utils
 
 """
 # KalAnalysis.com!
@@ -19,9 +20,9 @@ dfTickersList = None
 dfTickers = None
 dfTicker = None
 dfTickersGrid = None 
+lstTickers = []
 
-if 'dfSelected' not in st.session_state:
-    st.session_state.dfSelected = None
+finalTicker = None
 
 def GetTickersFromCSV():
     dfData = None
@@ -38,7 +39,6 @@ def drawSidebar(
     plot=False,
 ):
     st.write("Fun and educative Stock Analysis!")
-
 
 def drawMain(key, plot=False,):
     tabTickers, tabTickers2, tabThemes, tabHeader, tab1, tab2, tab3, tabPlots = st.tabs(["Tickers", "Tickers2", 'Themes', 'Header', "Tab1", "Tab2", "Tab3", 'Plots'])
@@ -62,18 +62,9 @@ def drawMain(key, plot=False,):
             enable_enterprise_modules=True,
             height=350, 
             width='100%',
-            reload_data=True
+            reload_data=False
         )
         data = grid_response['data']
-        selected = grid_response['selected_rows'] 
-        dfSelectedx = pd.DataFrame(selected) #Pass the selected rows to a new dataframe df   
-        if(st.session_state.dfSelected is None):
-            st.session_state.dfSelected = dfSelectedx.copy()
-        else:
-            st.session_state.dfSelected.append(dfSelectedx.copy()) 
-        st.write(st.session_state)
-
-
     with tabTickers2:
         st.header("Analyze Tickers")       
         st.table(dfTickersList)
@@ -206,29 +197,23 @@ def drawMain(key, plot=False,):
         #     st.plotly_chart(fig, use_container_width=True)
         st.header("Sample Plots")
 
-    st.header("Selected Tickers")       
-    if(st.session_state.dfSelected is not None):
-        try:
-            st.table(st.session_state.dfSelected)
-            ticker = st.session_state.dfSelected['Ticker'].iloc[0]
-        except:
-            pass
-
     if st.button('Download Tickers Data'):
         st.write(f'Downloading data for Selected Tickers')
-        # if(st.session_state.dfSelected is not None and len(st.session_state.dfSelected['Ticker'])>0):
-        #     selectedtickers = st.session_state.dfSelected["Ticker"].tolist()
-        #     dfTickers = main.GetTickersData(selectedtickers)
-        #     dfTickers.index.name = 'Date'
-        #     dfTickersGrid = dfTickers.reset_index()
+        if(grid_response['selected_rows'] is not None and len(grid_response['selected_rows'])>0):
+            for rowticker in grid_response['selected_rows']:
+                lstTickers.append(rowticker["Ticker"])
+            dfTickers = main.LoadTickersData(lstTickers)
 
-    st.header("Symbol Analysis - SA")       
+    st.header("Symbol Analysis - SA")    
+    selTicker = st.multiselect('Select Ticker to Analyze', lstTickers)
+    st.write('Selected Ticker :', selTicker)
     tabSADetails, tabSADetailsRaw = st.tabs(["Symbol Details", "Raw Details"])
     with tabSADetails:
         try:
-            if(st.session_state.dfSelected is not None):
-                st.header(f"Ticker {ticker} Data")       
-                gb1 = GridOptionsBuilder.from_dataframe(dfTickersGrid)
+            if(selTicker is not None):
+                st.header(f"Ticker {selTicker} Data") 
+                dfTicker = main.GetTickerData(selTicker)      
+                gb1 = GridOptionsBuilder.from_dataframe(dfTicker)
                 gb1.configure_pagination(paginationAutoPageSize=True) #Add pagination
                 gb1.configure_side_bar() #Add a sidebar
                 gb1.configure_selection('multiple', use_checkbox=True, groupSelectsChildren="Group checkbox select children") #Enable multi-row selection
@@ -245,7 +230,7 @@ def drawMain(key, plot=False,):
                     enable_enterprise_modules=True,
                     height=350, 
                     width='100%',
-                    reload_data=True
+                    reload_data=False
                 )
 
                 data = grid_response1['data']
