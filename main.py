@@ -103,8 +103,10 @@ def SaveTickersDownloadedData(lstTickers, dfData):
         #Utils.generate_daily_return(ticker)
 
 def GetTickerData(ticker):
-    return Utils.GetLocalTickerData(ticker)
-    
+    dfTicker = None
+    if(ticker is not None):
+        dfTicker = Utils.GetLocalTickerData(ticker)
+    return dfTicker
 
 
 def gather_customer_risk_input(risk_choices):

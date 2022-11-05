@@ -20,9 +20,8 @@ dfTickersList = None
 dfTickers = None
 dfTicker = None
 dfTickersGrid = None 
-lstTickers = []
 
-finalTicker = None
+
 
 def GetTickersFromCSV():
     dfData = None
@@ -41,6 +40,12 @@ def drawSidebar(
     st.write("Fun and educative Stock Analysis!")
 
 def drawMain(key, plot=False,):
+    if 'selTicker' not in st.session_state: 
+        st.session_state.selTicker = None
+    if 'finalTicker' not in st.session_state: 
+        st.session_state.finalTicker = None
+    if 'lstTickers' not in st.session_state:
+        st.session_state.lstTickers = []
     tabTickers, tabTickers2, tabThemes, tabHeader, tab1, tab2, tab3, tabPlots = st.tabs(["Tickers", "Tickers2", 'Themes', 'Header', "Tab1", "Tab2", "Tab3", 'Plots'])
     with tabTickers:
         dfTickersList = GetTickersFromCSV()
@@ -201,18 +206,25 @@ def drawMain(key, plot=False,):
         st.write(f'Downloading data for Selected Tickers')
         if(grid_response['selected_rows'] is not None and len(grid_response['selected_rows'])>0):
             for rowticker in grid_response['selected_rows']:
-                lstTickers.append(rowticker["Ticker"])
-            dfTickers = main.LoadTickersData(lstTickers)
+                print(f'row ticker of ticker  is {rowticker["Ticker"]}')
+                st.session_state.lstTickers.append(rowticker["Ticker"])
+            dfTickers = main.LoadTickersData(st.session_state.lstTickers)
+            print(f'lstTickers is {st.session_state.lstTickers}')
 
     st.header("Symbol Analysis - SA")    
-    selTicker = st.multiselect('Select Ticker to Analyze', lstTickers)
-    st.write('Selected Ticker :', selTicker)
+    def TickerSelected():
+        print(f'Selected Ticker :{st.session_state.selTicker}')
+        #st.write(f'Selected Ticker :{selTicker}')
+    st.session_state.selTicker = st.multiselect('Select Ticker to Analyze', options=st.session_state.lstTickers)
+    print(st.session_state.selTicker)
+    #on_change="TickerSelected", 
     tabSADetails, tabSADetailsRaw = st.tabs(["Symbol Details", "Raw Details"])
+    
     with tabSADetails:
         try:
-            if(selTicker is not None):
-                st.header(f"Ticker {selTicker} Data") 
-                dfTicker = main.GetTickerData(selTicker)      
+            if(st.session_state.selTicker is not None):
+                st.header(f"Ticker {st.session_state.selTicker} Data") 
+                dfTicker = main.GetTickerData(st.session_state.selTicker)      
                 gb1 = GridOptionsBuilder.from_dataframe(dfTicker)
                 gb1.configure_pagination(paginationAutoPageSize=True) #Add pagination
                 gb1.configure_side_bar() #Add a sidebar
@@ -240,14 +252,14 @@ def drawMain(key, plot=False,):
             st.write(f"Ticker not selected")       
     with tabSADetailsRaw:
         try:
-            if(ticker is not None):
-                st.header(f"Ticker {ticker} Data")       
+            if(st.session_state.selTicker is not None):
+                st.header(f"Ticker {st.session_state.selTicker} Data")       
                 st.table(dfTickers)
         except:    
             st.write(f"Ticker not selected")       
 
+def Main():
+    drawMain("main", plot=True)
 
-drawMain("main", plot=True)
-
-with st.sidebar:
-    drawSidebar("sidebar")
+    with st.sidebar:
+        drawSidebar("sidebar")
