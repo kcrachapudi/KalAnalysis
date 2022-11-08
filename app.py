@@ -215,25 +215,25 @@ def drawMain(key, plot=False,):
     def TickerSelected():
         print(f'Selected Ticker :{st.session_state.selTicker}')
         #st.write(f'Selected Ticker :{selTicker}')
-    st.session_state.selTicker = st.multiselect('Select Ticker to Analyze', options=st.session_state.lstTickers)
+    st.session_state.selTicker = st.selectbox('Select Ticker to Analyze', options=st.session_state.lstTickers)
     print(st.session_state.selTicker)
     #on_change="TickerSelected", 
     tabSADetails, tabSADetailsRaw = st.tabs(["Symbol Details", "Raw Details"])
     
     with tabSADetails:
         try:
-            if(st.session_state.selTicker is not None):
+            if(st.session_state.selTicker is not None and len(st.session_state.selTicker)>0):
                 st.header(f"Ticker {st.session_state.selTicker} Data") 
                 dfTicker = main.GetTickerData(st.session_state.selTicker)      
                 gb1 = GridOptionsBuilder.from_dataframe(dfTicker)
                 gb1.configure_pagination(paginationAutoPageSize=True) #Add pagination
                 gb1.configure_side_bar() #Add a sidebar
-                gb1.configure_selection('multiple', use_checkbox=True, groupSelectsChildren="Group checkbox select children") #Enable multi-row selection
+                #gb1.configure_selection('multiple', use_checkbox=True, groupSelectsChildren="Group checkbox select children") #Enable multi-row selection
                 gb1.configure_column("Date", type=["customDateTimeFormat"], custom_format_string='yyyy-MM-dd')
                 gridOptions1 = gb1.build()
 
                 grid_response1 = AgGrid(
-                    dfTickersGrid,
+                    dfTicker,
                     gridOptions=gridOptions1,
                     data_return_mode='AS_INPUT', 
                     update_mode='MODEL_CHANGED', 
@@ -248,8 +248,8 @@ def drawMain(key, plot=False,):
                 data = grid_response1['data']
                 selected1 = grid_response1['selected_rows'] 
                 dfSelected1 = pd.DataFrame(selected1) #Pass the selected rows to a new dataframe df    
-        except:    
-            st.write(f"Ticker not selected")       
+        except Exception as ex:    
+            st.write(f"Ticker not selected + {ex}")       
     with tabSADetailsRaw:
         try:
             if(st.session_state.selTicker is not None):
