@@ -13,6 +13,7 @@ import matplotlib_inline
 from sma import SMA
 from sma_ml import SMAML
 
+import Models
 import warnings
 warnings.simplefilter(action='ignore', category=FutureWarning)
 warnings.filterwarnings('ignore')
@@ -102,11 +103,13 @@ def SaveTickersDownloadedData(lstTickers, dfData):
         Utils.generate_daily_close(ticker, dfTicker)
         #Utils.generate_daily_return(ticker)
 
-def GetTickerData(ticker):
+def GetCompanyDetails(ticker):
+    company: Models.Company
     dfTicker = None
     if(ticker is not None):
         dfTicker = Utils.GetLocalTickerData(ticker)
-    return dfTicker
+        company = Models.Company(symbol=ticker, dfTicker=dfTicker)
+    return company
 
 
 def gather_customer_risk_input(risk_choices):

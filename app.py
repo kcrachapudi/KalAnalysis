@@ -5,7 +5,7 @@ import numpy as np
 from st_aggrid import GridOptionsBuilder, AgGrid, GridUpdateMode, DataReturnMode
 import main
 import Utils
-
+import Models
 """
 # KalAnalysis.com!
 Comprehensive AI based Quant Stock Analysis to empower Users to make informed Trade Decisions.
@@ -46,6 +46,9 @@ def drawMain(key, plot=False,):
         st.session_state.finalTicker = None
     if 'lstTickers' not in st.session_state:
         st.session_state.lstTickers = []
+    if 'company' not in st.session_state: 
+        st.session_state.company = None
+
     tabTickers, tabTickers2, tabThemes, tabHeader, tab1, tab2, tab3, tabPlots = st.tabs(["Tickers", "Tickers2", 'Themes', 'Header', "Tab1", "Tab2", "Tab3", 'Plots'])
     with tabTickers:
         dfTickersList = GetTickersFromCSV()
@@ -224,30 +227,31 @@ def drawMain(key, plot=False,):
         try:
             if(st.session_state.selTicker is not None and len(st.session_state.selTicker)>0):
                 st.header(f"Ticker {st.session_state.selTicker} Data") 
-                dfTicker = main.GetTickerData(st.session_state.selTicker)      
-                gb1 = GridOptionsBuilder.from_dataframe(dfTicker)
+                st.session_state.company = main.GetCompanyDetails(st.session_state.selTicker)      
+                #dfTicker = st.session_state.company.dfCompany
+                gb1 = GridOptionsBuilder.from_dataframe(st.session_state.company.dfCompany)
                 gb1.configure_pagination(paginationAutoPageSize=True) #Add pagination
                 gb1.configure_side_bar() #Add a sidebar
                 #gb1.configure_selection('multiple', use_checkbox=True, groupSelectsChildren="Group checkbox select children") #Enable multi-row selection
                 gb1.configure_column("Date", type=["customDateTimeFormat"], custom_format_string='yyyy-MM-dd')
                 gridOptions1 = gb1.build()
 
-                grid_response1 = AgGrid(
-                    dfTicker,
-                    gridOptions=gridOptions1,
-                    data_return_mode='AS_INPUT', 
-                    update_mode='MODEL_CHANGED', 
-                    fit_columns_on_grid_load=False,
-                    #theme='blue', #Add theme color to the table
-                    enable_enterprise_modules=True,
-                    height=350, 
-                    width='100%',
-                    reload_data=False
-                )
-
-                data = grid_response1['data']
-                selected1 = grid_response1['selected_rows'] 
-                dfSelected1 = pd.DataFrame(selected1) #Pass the selected rows to a new dataframe df    
+                if(st.session_state.company is not None):
+                    grid_response1 = AgGrid(
+                        st.session_state.company.dfCompany,
+                        gridOptions=gridOptions1,
+                        data_return_mode='AS_INPUT', 
+                        update_mode='MODEL_CHANGED', 
+                        fit_columns_on_grid_load=False,
+                        #theme='blue', #Add theme color to the table
+                        enable_enterprise_modules=True,
+                        height=350, 
+                        width='100%',
+                        reload_data=False
+                    )
+                    data = grid_response1['data']
+                    selected1 = grid_response1['selected_rows'] 
+                    dfSelected1 = pd.DataFrame(selected1) #Pass the selected rows to a new dataframe df    
         except Exception as ex:    
             st.write(f"Ticker not selected + {ex}")       
     with tabSADetailsRaw:
