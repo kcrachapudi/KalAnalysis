@@ -223,13 +223,29 @@ def drawMain(key, plot=False,):
     if(st.session_state.selTicker is not None and len(st.session_state.selTicker)>0):
         st.session_state.company = main.GetCompanyDetails(st.session_state.selTicker)      
     
-    tabTickerData, tabTickerDetails = st.tabs(["Ticker Data", 'Ticker Details'])
+    tabTickerData, tabCloseData, tabVolumeData = st.tabs(["Ticker Data", 'Close Data', 'Volume Data'])
     with tabTickerData:
         try:
             if(st.session_state.selTicker is not None and len(st.session_state.selTicker)>0):
                 st.header(f"Ticker {st.session_state.selTicker} Data") 
                 #st.table(st.session_state.company.dfCompany)
                 st.dataframe(st.session_state.company.dfCompany, 700, 300)
+        except:    
+            st.write(f"Ticker not selected")       
+    with tabCloseData:
+        try:
+            if(st.session_state.selTicker is not None and len(st.session_state.selTicker)>0):
+                st.header(f"{st.session_state.selTicker} Close Data") 
+                dfClose = st.session_state.company.dfCompany['Close']
+                st.dataframe(dfClose, 700, 300)
+        except:    
+            st.write(f"Ticker not selected")       
+    with tabVolumeData:
+        try:
+            if(st.session_state.selTicker is not None and len(st.session_state.selTicker)>0):
+                st.header(f"{st.session_state.selTicker}  Volume Data") 
+                dfVolume = st.session_state.company.dfCompany['Volume']
+                st.dataframe(dfVolume, 700, 300)
         except:    
             st.write(f"Ticker not selected")       
 
