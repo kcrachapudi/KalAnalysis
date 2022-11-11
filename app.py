@@ -220,45 +220,16 @@ def drawMain(key, plot=False,):
         #st.write(f'Selected Ticker :{selTicker}')
     st.session_state.selTicker = st.selectbox('Select Ticker to Analyze', options=st.session_state.lstTickers)
     print(st.session_state.selTicker)
-    #on_change="TickerSelected", 
-    tabSADetails, tabSADetailsRaw = st.tabs(["Symbol Details", "Raw Details"])
+    if(st.session_state.selTicker is not None and len(st.session_state.selTicker)>0):
+        st.session_state.company = main.GetCompanyDetails(st.session_state.selTicker)      
     
-    with tabSADetails:
+    tabTickerData, tabTickerDetails = st.tabs(["Ticker Data", 'Ticker Details'])
+    with tabTickerData:
         try:
             if(st.session_state.selTicker is not None and len(st.session_state.selTicker)>0):
                 st.header(f"Ticker {st.session_state.selTicker} Data") 
-                st.session_state.company = main.GetCompanyDetails(st.session_state.selTicker)      
-                #dfTicker = st.session_state.company.dfCompany
-                gb1 = GridOptionsBuilder.from_dataframe(st.session_state.company.dfCompany)
-                gb1.configure_pagination(paginationAutoPageSize=True) #Add pagination
-                gb1.configure_side_bar() #Add a sidebar
-                #gb1.configure_selection('multiple', use_checkbox=True, groupSelectsChildren="Group checkbox select children") #Enable multi-row selection
-                gb1.configure_column("Date", type=["customDateTimeFormat"], custom_format_string='yyyy-MM-dd')
-                gridOptions1 = gb1.build()
-
-                if(st.session_state.company is not None):
-                    grid_response1 = AgGrid(
-                        st.session_state.company.dfCompany,
-                        gridOptions=gridOptions1,
-                        data_return_mode='AS_INPUT', 
-                        update_mode='MODEL_CHANGED', 
-                        fit_columns_on_grid_load=False,
-                        #theme='blue', #Add theme color to the table
-                        enable_enterprise_modules=True,
-                        height=350, 
-                        width='100%',
-                        reload_data=False
-                    )
-                    data = grid_response1['data']
-                    selected1 = grid_response1['selected_rows'] 
-                    dfSelected1 = pd.DataFrame(selected1) #Pass the selected rows to a new dataframe df    
-        except Exception as ex:    
-            st.write(f"Ticker not selected + {ex}")       
-    with tabSADetailsRaw:
-        try:
-            if(st.session_state.selTicker is not None):
-                st.header(f"Ticker {st.session_state.selTicker} Data")       
-                st.table(dfTickers)
+                #st.table(st.session_state.company.dfCompany)
+                st.dataframe(st.session_state.company.dfCompany, 700, 300)
         except:    
             st.write(f"Ticker not selected")       
 

@@ -60,6 +60,21 @@ def SetupTickerDataFrame():
     return dfTickers
 
 
+def download_etf_data(dfTickers):
+    #Provide the Tickers dataframe so that the data can be downloaded from YFinance
+    return cloud_data_collector.download_yfinance_data(dfTickers)
+    
+
+def save_etf_data(dfTickers, dfData):
+    # Get  the Ticker Data and Save it locally for analysis
+    # Saving the daily close data and generate and save daily return data as csv
+    for ticker in dfTickers['Symbol'].tolist():
+        dfTicker = dfData['Close'][ticker]
+        Utils.generate_daily_close(ticker, dfTicker)
+        Utils.generate_daily_return(ticker)
+
+
+
 def SetupSymbolDataFrame(dfSymbol):
     if(dfSymbol is not None):
         #Create a DataFrame with empty values for other columns for now
@@ -99,8 +114,7 @@ def SaveTickersDownloadedData(lstTickers, dfData):
     # Saving the daily close data and generate and save daily return data as csv
     for ticker in lstTickers:
         dfTicker = dfData[ticker]
-        print(dfTicker)
-        Utils.generate_daily_close(ticker, dfTicker)
+        Utils.SaveTickerData(ticker, dfTicker)
         #Utils.generate_daily_return(ticker)
 
 def GetCompanyDetails(ticker):

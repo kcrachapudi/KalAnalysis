@@ -11,7 +11,7 @@ def get_download_details():
     try:
         absdir = Path(__file__).parent.absolute()
         csvreadname = 'download_details.csv'
-        csvreadpath = Path(f'{absdir}/Daily_Close/{csvreadname}')
+        csvreadpath = Path(f'{absdir}/TickerData/{csvreadname}')
         dfData = pd.read_csv(csvreadpath)
         strdownload_date = dfData.at[dfData.index[0], 'DownloadDate']
         download_date = datetime.datetime.strptime(strdownload_date , '%Y-%m-%d').date()
@@ -23,9 +23,9 @@ def GetLocalTickerData(ticker):
     dfTickerData = None
     try:
         absdir = Path(__file__).parent.absolute()
-        csvreadname = ticker + '_Daily_Close.csv'
+        csvreadname = ticker + '_Ticker_Data.csv'
         #print(f'Processing {csvreadname}')
-        csvreadpath = Path(f'{absdir}/Daily_Close/{csvreadname}')
+        csvreadpath = Path(f'{absdir}/TickerData/{csvreadname}')
         dfTickerData = pd.read_csv(Path(csvreadpath), index_col='Date', parse_dates=True, infer_datetime_format=True)
         #dfTickerData.rename(columns = {ticker:'Close'}, inplace = True)
     except Exception as ex:
@@ -43,7 +43,7 @@ def save_dataframe_to_abslocation(dfData, filename):
 def save_download_details():
     absdir = Path(__file__).parent.absolute()
     csvwritename = 'download_details.csv'
-    csvwritepath = Path(f'{absdir}/Daily_Close/{csvwritename}')
+    csvwritepath = Path(f'{absdir}/TickerData/{csvwritename}')
     # initialize list of lists
     listdata = [[datetime.date.today()]]
     #Create the pandas DataFrame
@@ -51,10 +51,10 @@ def save_download_details():
     dfNow.to_csv(csvwritepath) 
 
 
-def generate_daily_close(ticker, dfTicker):
+def SaveTickerData(ticker, dfTicker):
     absdir = Path(__file__).parent.absolute()
-    csvwritename = ticker +'_Daily_Close.csv'
-    csvwritepath = Path(f'{absdir}/Daily_Close/{csvwritename}')
+    csvwritename = ticker +'_Ticker_Data.csv'
+    csvwritepath = Path(f'{absdir}/TickerData/{csvwritename}')
     dfTicker.to_csv(csvwritepath) 
 
 
