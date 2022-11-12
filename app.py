@@ -6,6 +6,7 @@ from st_aggrid import GridOptionsBuilder, AgGrid, GridUpdateMode, DataReturnMode
 import main
 import Utils
 import Models
+import plotly.graph_objects as go
 """
 # KalAnalysis.com!
 Comprehensive AI based Quant Stock Analysis to empower Users to make informed Trade Decisions.
@@ -238,16 +239,23 @@ def drawMain(key, plot=False,):
                 st.header(f"{st.session_state.selTicker} Close Data") 
                 dfClose = st.session_state.company.dfCompany['Close']
                 st.dataframe(dfClose, 700, 300)
-        except:    
-            st.write(f"Ticker not selected")       
+
+                chtCloseHist = go.Figure(data=go.Scatter(x=dfClose.index, y=dfClose, mode='lines'))
+                #chtCloseHist.show() This shows a plot in a new browser tab
+                st.plotly_chart(chtCloseHist, use_container_width=True)
+        except Exception as ex1:    
+            st.write(f"Exception in tabCloseData {ex1}")       
     with tabVolumeData:
         try:
             if(st.session_state.selTicker is not None and len(st.session_state.selTicker)>0):
                 st.header(f"{st.session_state.selTicker}  Volume Data") 
                 dfVolume = st.session_state.company.dfCompany['Volume']
                 st.dataframe(dfVolume, 700, 300)
-        except:    
-            st.write(f"Ticker not selected")       
+
+                chtVolumeHist = go.Figure(data=go.Scatter(x=dfVolume.index, y=dfVolume, mode='lines'))
+                st.plotly_chart(chtVolumeHist, use_container_width=True)
+        except Exception as ex2:    
+            st.write(f"Exception in tabVolumeData {ex2}")       
 
 def Main():
     drawMain("main", plot=True)
