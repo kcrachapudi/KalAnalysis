@@ -7,6 +7,7 @@ import main
 import Utils
 import Models
 import plotly.graph_objects as go
+from plotly.subplots import make_subplots
 """
 # KalAnalysis.com!
 Comprehensive AI based Quant Stock Analysis to empower Users to make informed Trade Decisions.
@@ -224,7 +225,7 @@ def drawMain(key, plot=False,):
     if(st.session_state.selTicker is not None and len(st.session_state.selTicker)>0):
         st.session_state.company = main.GetCompanyDetails(st.session_state.selTicker)      
     
-    tabTickerData, tabCloseData, tabVolumeData = st.tabs(["Ticker Data", 'Close Data', 'Volume Data'])
+    tabTickerData, tabCloseData, tabVolumeData, tabCloseVolumeData = st.tabs(["Ticker Data", 'Close Data', 'Volume Data', 'CloseAndVolume'])
     with tabTickerData:
         try:
             if(st.session_state.selTicker is not None and len(st.session_state.selTicker)>0):
@@ -243,6 +244,9 @@ def drawMain(key, plot=False,):
                 chtCloseHist = go.Figure(data=go.Scatter(x=dfClose.index, y=dfClose, mode='lines'))
                 #chtCloseHist.show() This shows a plot in a new browser tab
                 st.plotly_chart(chtCloseHist, use_container_width=True)
+
+                chtCloseHist1 = go.Figure(data=go.Scatter(x=dfClose.index, y=dfClose, mode='lines+markers'))
+                st.plotly_chart(chtCloseHist1, use_container_width=True)
         except Exception as ex1:    
             st.write(f"Exception in tabCloseData {ex1}")       
     with tabVolumeData:
@@ -254,6 +258,29 @@ def drawMain(key, plot=False,):
 
                 chtVolumeHist = go.Figure(data=go.Scatter(x=dfVolume.index, y=dfVolume, mode='lines'))
                 st.plotly_chart(chtVolumeHist, use_container_width=True)
+
+                chtVolumeHist1 = go.Figure(data=go.Scatter(x=dfVolume.index, y=dfVolume, mode='lines+markers'))
+                st.plotly_chart(chtVolumeHist1, use_container_width=True)        
+        except Exception as ex2:    
+            st.write(f"Exception in tabVolumeData {ex2}")       
+    with tabCloseVolumeData:
+        try:
+            if(st.session_state.selTicker is not None and len(st.session_state.selTicker)>0):
+                st.header(f"{st.session_state.selTicker}  Close and Volume") 
+                dfClose = st.session_state.company.dfCompany['Close']
+                dfVolumne = st.session_state.company.dfCompany['Volume']
+
+                chtCloseVolume1 = make_subplots(specs=[[{"secondary_y": True}]])
+                chtCloseVolume1.add_trace(go.Scatter(x=dfClose.index, y=dfClose, name='Close'), secondary_y=False)
+                chtCloseVolume1.add_trace(go.Bar(x=dfVolume.index, y=dfVolume, name='Volume'), secondary_y=True)
+                st.plotly_chart(chtCloseVolume1, use_container_width=True)
+
+                chtCloseVolume2 = make_subplots(specs=[[{"secondary_y": True}]])
+                chtCloseVolume2.add_trace(go.Scatter(x=dfClose.index, y=dfClose, name='Close'), secondary_y=False)
+                chtCloseVolume2.add_trace(go.Bar(x=dfVolume.index, y=dfVolume, name='Volume'), secondary_y=True)
+                chtCloseVolume2.update_yaxes(range=[0,700000000],secondary_y=True)
+                chtCloseVolume2.update_yaxes(visible=False, secondary_y=True)
+                st.plotly_chart(chtCloseVolume2, use_container_width=True)
         except Exception as ex2:    
             st.write(f"Exception in tabVolumeData {ex2}")       
 
