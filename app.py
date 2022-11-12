@@ -225,7 +225,7 @@ def drawMain(key, plot=False,):
     if(st.session_state.selTicker is not None and len(st.session_state.selTicker)>0):
         st.session_state.company = main.GetCompanyDetails(st.session_state.selTicker)      
     
-    tabTickerData, tabCloseData, tabVolumeData, tabCloseVolumeData = st.tabs(["Ticker Data", 'Close Data', 'Volume Data', 'CloseAndVolume'])
+    tabTickerData, tabCloseData, tabVolumeData, tabCloseVolumeData, tabOHLC = st.tabs(["Ticker Data", 'Close Data', 'Volume Data', 'CloseAndVolume', 'OHLC'])
     with tabTickerData:
         try:
             if(st.session_state.selTicker is not None and len(st.session_state.selTicker)>0):
@@ -278,11 +278,25 @@ def drawMain(key, plot=False,):
                 chtCloseVolume2 = make_subplots(specs=[[{"secondary_y": True}]])
                 chtCloseVolume2.add_trace(go.Scatter(x=dfClose.index, y=dfClose, name='Close'), secondary_y=False)
                 chtCloseVolume2.add_trace(go.Bar(x=dfVolume.index, y=dfVolume, name='Volume'), secondary_y=True)
-                chtCloseVolume2.update_yaxes(range=[0,700000000],secondary_y=True)
+                chtCloseVolume2.update_yaxes(range=[0,70000000],secondary_y=True)
                 chtCloseVolume2.update_yaxes(visible=False, secondary_y=True)
                 st.plotly_chart(chtCloseVolume2, use_container_width=True)
         except Exception as ex2:    
             st.write(f"Exception in tabVolumeData {ex2}")       
+    with tabOHLC:
+        try:
+            if(st.session_state.selTicker is not None and len(st.session_state.selTicker)>0):
+                st.header(f"{st.session_state.selTicker}  OHLC") 
+                chtOHLC = make_subplots(specs=[[{"secondary_y": True}]])
+                chtOHLC.add_trace(go.Candlestick(x=st.session_state.company.dfCompany.index,
+                              open=st.session_state.company.dfCompany['Open'],
+                              high=st.session_state.company.dfCompany['High'],
+                              low=st.session_state.company.dfCompany['Low'],
+                              close=st.session_state.company.dfCompany['Close'],
+                             ))
+                st.plotly_chart(chtOHLC, use_container_width=True)
+        except Exception as ex3:
+            st.write(f"Exception in tabVolumeData {ex3}")               
 
 def Main():
     drawMain("main", plot=True)
