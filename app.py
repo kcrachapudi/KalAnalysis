@@ -199,10 +199,10 @@ def drawMain(key, plot=False,):
         #     x2 = np.random.randn(200)
         #     x3 = np.random.randn(200) + 2
 
-        #     hist_data = [x1, x2, x3]
+        #     st.session_state.company_data = [x1, x2, x3]
         #     group_labels = ["Group 1", "Group 2", "Group 3"]
 
-        #     fig = ff.create_distplot(hist_data, group_labels, bin_size=[0.1, 0.25, 0.5])
+        #     fig = ff.create_distplot(st.session_state.company_data, group_labels, bin_size=[0.1, 0.25, 0.5])
 
         #     st.plotly_chart(fig, use_container_width=True)
         st.header("Sample Plots")
@@ -232,8 +232,8 @@ def drawMain(key, plot=False,):
                 st.header(f"Ticker {st.session_state.selTicker} Data") 
                 #st.table(st.session_state.company.dfCompany)
                 st.dataframe(st.session_state.company.dfCompany, 700, 300)
-        except:    
-            st.write(f"Ticker not selected")       
+        except Exception as ex:    
+            st.write(f"Exception {ex}")               
     with tabCloseData:
         try:
             if(st.session_state.selTicker is not None and len(st.session_state.selTicker)>0):
@@ -241,14 +241,14 @@ def drawMain(key, plot=False,):
                 dfClose = st.session_state.company.dfCompany['Close']
                 st.dataframe(dfClose, 700, 300)
 
-                chtCloseHist = go.Figure(data=go.Scatter(x=dfClose.index, y=dfClose, mode='lines'))
-                #chtCloseHist.show() This shows a plot in a new browser tab
-                st.plotly_chart(chtCloseHist, use_container_width=True)
+                chtClosest.session_state.company = go.Figure(data=go.Scatter(x=dfClose.index, y=dfClose, mode='lines'))
+                #chtClosest.session_state.company.show() This shows a plot in a new browser tab
+                st.plotly_chart(chtClosest.session_state.company, use_container_width=True)
 
-                chtCloseHist1 = go.Figure(data=go.Scatter(x=dfClose.index, y=dfClose, mode='lines+markers'))
-                st.plotly_chart(chtCloseHist1, use_container_width=True)
+                chtClosest.session_state.company1 = go.Figure(data=go.Scatter(x=dfClose.index, y=dfClose, mode='lines+markers'))
+                st.plotly_chart(chtClosest.session_state.company1, use_container_width=True)
         except Exception as ex1:    
-            st.write(f"Exception in tabCloseData {ex1}")       
+            st.write(f"Exception {ex1}")       
     with tabVolumeData:
         try:
             if(st.session_state.selTicker is not None and len(st.session_state.selTicker)>0):
@@ -256,13 +256,13 @@ def drawMain(key, plot=False,):
                 dfVolume = st.session_state.company.dfCompany['Volume']
                 st.dataframe(dfVolume, 700, 300)
 
-                chtVolumeHist = go.Figure(data=go.Scatter(x=dfVolume.index, y=dfVolume, mode='lines'))
-                st.plotly_chart(chtVolumeHist, use_container_width=True)
+                chtVolumest.session_state.company = go.Figure(data=go.Scatter(x=dfVolume.index, y=dfVolume, mode='lines'))
+                st.plotly_chart(chtVolumest.session_state.company, use_container_width=True)
 
-                chtVolumeHist1 = go.Figure(data=go.Scatter(x=dfVolume.index, y=dfVolume, mode='lines+markers'))
-                st.plotly_chart(chtVolumeHist1, use_container_width=True)        
+                chtVolumest.session_state.company1 = go.Figure(data=go.Scatter(x=dfVolume.index, y=dfVolume, mode='lines+markers'))
+                st.plotly_chart(chtVolumest.session_state.company1, use_container_width=True)        
         except Exception as ex2:    
-            st.write(f"Exception in tabVolumeData {ex2}")       
+            st.write(f"Exception {ex2}")       
     with tabCloseVolumeData:
         try:
             if(st.session_state.selTicker is not None and len(st.session_state.selTicker)>0):
@@ -282,7 +282,7 @@ def drawMain(key, plot=False,):
                 chtCloseVolume2.update_yaxes(visible=False, secondary_y=True)
                 st.plotly_chart(chtCloseVolume2, use_container_width=True)
         except Exception as ex2:    
-            st.write(f"Exception in tabVolumeData {ex2}")       
+            st.write(f"Exception {ex2}")       
     with tabOHLC:
         try:
             if(st.session_state.selTicker is not None and len(st.session_state.selTicker)>0):
@@ -296,7 +296,92 @@ def drawMain(key, plot=False,):
                              ))
                 st.plotly_chart(chtOHLC, use_container_width=True)
         except Exception as ex3:
-            st.write(f"Exception in tabVolumeData {ex3}")               
+            st.write(f"Exception {ex3}")               
+
+    #Indicators and Analytics
+    st.header(f"{st.session_state.selTicker} Indicators") 
+    tabIndicator20, tabIndicator60, tabIndicator180, tabIndicator360 = st.tabs(["20 Day Moving Average", '60 Day Moving Average', '180 Day Moving Average', '360 Day Moving Average'])
+    with tabIndicator20:
+        try:
+            if(st.session_state.selTicker is not None and len(st.session_state.selTicker)>0):
+                chtInd20MA = make_subplots(specs=[[{"secondary_y": True}]])
+                chtInd20MA.add_trace(go.Candlestick(x=st.session_state.company.dfCompany.index,
+                                            open=st.session_state.company.dfCompany['Open'],
+                                            high=st.session_state.company.dfCompany['High'],
+                                            low=st.session_state.company.dfCompany['Low'],
+                                            close=st.session_state.company.dfCompany['Close'],
+                                            name='Price'))
+                chtInd20MA.add_trace(go.Scatter(x=st.session_state.company.dfCompany.index,y=st.session_state.company.dfCompany['Close'].rolling(window=20).mean(),marker_color='blue',name='20 Day MA'))
+                chtInd20MA.add_trace(go.Bar(x=st.session_state.company.dfCompany.index, y=st.session_state.company.dfCompany['Volume'], name='Volume', marker={'color':'orange'}), secondary_y=True)
+                chtInd20MA.update_yaxes(range=[0,70000000],secondary_y=True)
+                chtInd20MA.update_yaxes(visible=False, secondary_y=True)
+                chtInd20MA.update_layout(xaxis_rangeslider_visible=False)  #hide range slider
+                chtInd20MA.update_layout(title={'text':f'{st.session_state.selTicker}', 'x':0.5})
+                chtInd20MA.show()                
+                st.plotly_chart(chtInd20MA, use_container_width=True)
+        except Exception as ex:    
+            st.write(f"Exception {ex}")               
+    with tabIndicator60:
+        try:
+            if(st.session_state.selTicker is not None and len(st.session_state.selTicker)>0):
+                chtInd20MA = make_subplots(specs=[[{"secondary_y": True}]])
+                chtInd20MA.add_trace(go.Candlestick(x=st.session_state.company.dfCompany.index,
+                                            open=st.session_state.company.dfCompany['Open'],
+                                            high=st.session_state.company.dfCompany['High'],
+                                            low=st.session_state.company.dfCompany['Low'],
+                                            close=st.session_state.company.dfCompany['Close'],
+                                            name='Price'))
+                chtInd20MA.add_trace(go.Scatter(x=st.session_state.company.dfCompany.index,y=st.session_state.company.dfCompany['Close'].rolling(window=60).mean(),marker_color='blue',name='60 Day MA'))
+                chtInd20MA.add_trace(go.Bar(x=st.session_state.company.dfCompany.index, y=st.session_state.company.dfCompany['Volume'], name='Volume', marker={'color':'orange'}), secondary_y=True)
+                chtInd20MA.update_yaxes(range=[0,70000000],secondary_y=True)
+                chtInd20MA.update_yaxes(visible=False, secondary_y=True)
+                chtInd20MA.update_layout(xaxis_rangeslider_visible=False)  #hide range slider
+                chtInd20MA.update_layout(title={'text':f'{st.session_state.selTicker}', 'x':0.5})
+                chtInd20MA.show()                
+                st.plotly_chart(chtInd20MA, use_container_width=True)
+        except Exception as ex:    
+            st.write(f"Exception {ex}")               
+    with tabIndicator180:
+        try:
+            if(st.session_state.selTicker is not None and len(st.session_state.selTicker)>0):
+                chtInd20MA = make_subplots(specs=[[{"secondary_y": True}]])
+                chtInd20MA.add_trace(go.Candlestick(x=st.session_state.company.dfCompany.index,
+                                            open=st.session_state.company.dfCompany['Open'],
+                                            high=st.session_state.company.dfCompany['High'],
+                                            low=st.session_state.company.dfCompany['Low'],
+                                            close=st.session_state.company.dfCompany['Close'],
+                                            name='Price'))
+                chtInd20MA.add_trace(go.Scatter(x=st.session_state.company.dfCompany.index,y=st.session_state.company.dfCompany['Close'].rolling(window=180).mean(),marker_color='blue',name='180 Day MA'))
+                chtInd20MA.add_trace(go.Bar(x=st.session_state.company.dfCompany.index, y=st.session_state.company.dfCompany['Volume'], name='Volume', marker={'color':'orange'}), secondary_y=True)
+                chtInd20MA.update_yaxes(range=[0,70000000],secondary_y=True)
+                chtInd20MA.update_yaxes(visible=False, secondary_y=True)
+                chtInd20MA.update_layout(xaxis_rangeslider_visible=False)  #hide range slider
+                chtInd20MA.update_layout(title={'text':f'{st.session_state.selTicker}', 'x':0.5})
+                chtInd20MA.show()                
+                st.plotly_chart(chtInd20MA, use_container_width=True)
+        except Exception as ex:    
+            st.write(f"Exception {ex}")               
+    with tabIndicator360:
+        try:
+            if(st.session_state.selTicker is not None and len(st.session_state.selTicker)>0):
+                chtInd20MA = make_subplots(specs=[[{"secondary_y": True}]])
+                chtInd20MA.add_trace(go.Candlestick(x=st.session_state.company.dfCompany.index,
+                                            open=st.session_state.company.dfCompany['Open'],
+                                            high=st.session_state.company.dfCompany['High'],
+                                            low=st.session_state.company.dfCompany['Low'],
+                                            close=st.session_state.company.dfCompany['Close'],
+                                            name='Price'))
+                chtInd20MA.add_trace(go.Scatter(x=st.session_state.company.dfCompany.index,y=st.session_state.company.dfCompany['Close'].rolling(window=360).mean(),marker_color='blue',name='360 Day MA'))
+                chtInd20MA.add_trace(go.Bar(x=st.session_state.company.dfCompany.index, y=st.session_state.company.dfCompany['Volume'], name='Volume', marker={'color':'orange'}), secondary_y=True)
+                chtInd20MA.update_yaxes(range=[0,70000000],secondary_y=True)
+                chtInd20MA.update_yaxes(visible=False, secondary_y=True)
+                chtInd20MA.update_layout(xaxis_rangeslider_visible=False)  #hide range slider
+                chtInd20MA.update_layout(title={'text':f'{st.session_state.selTicker}', 'x':0.5})
+                chtInd20MA.show()                
+                st.plotly_chart(chtInd20MA, use_container_width=True)
+        except Exception as ex:    
+            st.write(f"Exception {ex}")               
+
 
 def Main():
     drawMain("main", plot=True)
