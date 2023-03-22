@@ -1,7 +1,6 @@
 import pandas as pd
 from pathlib import Path
 import numpy as np
-import questionary
 
 class Customer:
     cust_expected_return = 0.0

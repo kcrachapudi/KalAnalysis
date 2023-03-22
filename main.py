@@ -2,14 +2,12 @@ from datetime import datetime
 import pandas as pd
 from pathlib import Path
 import numpy as np
-import questionary
+
 import cloud_data_collector
 from customer import Customer
 import Utils
 import datetime
 
-import matplotlib
-import matplotlib_inline
 from sma import SMA
 from sma_ml import SMAML
 
