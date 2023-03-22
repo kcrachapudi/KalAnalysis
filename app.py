@@ -388,3 +388,6 @@ def Main():
 
     with st.sidebar:
         drawSidebar("sidebar")
+
+
+Main()
