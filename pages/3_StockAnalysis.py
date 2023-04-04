@@ -3,7 +3,7 @@ import plotly.figure_factory as ff
 import pandas as pd
 import numpy as np
 from st_aggrid import GridOptionsBuilder, AgGrid, GridUpdateMode, DataReturnMode
-import main
+import Home
 import Utils
 import Models
 import plotly.graph_objects as go
@@ -34,14 +34,8 @@ def GetTickersFromCSV():
         print(f"Error in Loading Tickers.csv {ex}")
     return dfData
 
-# Draw some dummy content in main page and sidebar.
-def drawSidebar(
-    key,
-    plot=False,
-):
-    st.write("Fun and educative Stock Analysis!")
 
-def drawMain(key, plot=False,):
+def init(key, plot=False,):
     if 'selTicker' not in st.session_state: 
         st.session_state.selTicker = None
     if 'finalTicker' not in st.session_state: 
@@ -213,7 +207,7 @@ def drawMain(key, plot=False,):
             for rowticker in grid_response['selected_rows']:
                 print(f'row ticker of ticker  is {rowticker["Ticker"]}')
                 st.session_state.lstTickers.append(rowticker["Ticker"])
-            dfTickers = main.LoadTickersData(st.session_state.lstTickers)
+            dfTickers = Home.LoadTickersData(st.session_state.lstTickers)
             print(f'lstTickers is {st.session_state.lstTickers}')
 
     st.header("Symbol Analysis - SA")    
@@ -223,7 +217,7 @@ def drawMain(key, plot=False,):
     st.session_state.selTicker = st.selectbox('Select Ticker to Analyze', options=st.session_state.lstTickers)
     print(st.session_state.selTicker)
     if(st.session_state.selTicker is not None and len(st.session_state.selTicker)>0):
-        st.session_state.company = main.GetCompanyDetails(st.session_state.selTicker)      
+        st.session_state.company = Home.GetCompanyDetails(st.session_state.selTicker)      
     
     tabTickerData, tabCloseData, tabVolumeData, tabCloseVolumeData, tabOHLC = st.tabs(["Ticker Data", 'Close Data', 'Volume Data', 'CloseAndVolume', 'OHLC'])
     with tabTickerData:
@@ -383,11 +377,4 @@ def drawMain(key, plot=False,):
             st.write(f"Exception {ex}")               
 
 
-def Main():
-    drawMain("main", plot=True)
-
-    with st.sidebar:
-        drawSidebar("sidebar")
-
-
-Main()
+init()

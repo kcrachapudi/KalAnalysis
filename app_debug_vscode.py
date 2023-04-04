@@ -2,7 +2,7 @@
 import ptvsd
 import streamlit as st
 
-import app
+import Home
 
 # pylint: disable=invalid-name
 markdown = st.markdown(
@@ -22,4 +22,4 @@ ptvsd.wait_for_attach()
 
 markdown.empty()
 
-app.Main()
+Home.run()
