@@ -4,7 +4,7 @@ CURRENT_THEME = "blue"
 IS_DARK_THEME = True
 
 def run():
-    st.set_page_config(page_title = "KalAnalysis Fun Stock and Crypto Analysis")
+    st.set_page_config(page_title = "KalAnalysis Fun Stock and Crypto Analysis", layout="wide")
     body()
     sidebar()
 
