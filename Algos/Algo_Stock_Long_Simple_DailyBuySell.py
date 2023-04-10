@@ -56,7 +56,7 @@ def Init(dfTicker):
         # set the CostAmount column equal to the negative value of the row Close price multiplied by the quantity
         if previous_price == 0:
             dfTicker.loc[index, "TradeType"] = "buy"
-            dfTicker.loc[index, "CostAmount"] = -(row["Close"] * quantity)
+            dfTicker.loc[index, "CostAmount"] = round(-(row["Close"] * quantity), 2)
             accumulated_shares += quantity
             dfTicker.loc[index, "Accumulated"] = accumulated_shares
 
@@ -65,7 +65,7 @@ def Init(dfTicker):
         # multiplied by the quantity
         elif row["Close"] < previous_price:
             dfTicker.loc[index, "TradeType"] = "buy"
-            dfTicker.loc[index, "CostAmount"] = -(row["Close"] * quantity)
+            dfTicker.loc[index, "CostAmount"] = round(-(row["Close"] * quantity), 2)
             accumulated_shares += quantity
             dfTicker.loc[index, "Accumulated"] = accumulated_shares
         
@@ -73,7 +73,7 @@ def Init(dfTicker):
         elif row["Close"] > previous_price:
             if(accumulated_shares>0):
                 dfTicker.loc[index, "TradeType"] = "sell"
-                dfTicker.loc[index, "CostAmount"] = row["Close"] * quantity
+                dfTicker.loc[index, "CostAmount"] = round(row["Close"] * quantity, 2)
                 accumulated_shares -= quantity
                 dfTicker.loc[index, "Accumulated"] = accumulated_shares
             else:
@@ -93,7 +93,7 @@ def Init(dfTicker):
         if index == dfTicker.index[-1]:
             if(accumulated_shares>0):
                 dfTicker.loc[index, "TradeType"] = "sell"
-                dfTicker.loc[index, "CostAmount"] = row["Close"] * accumulated_shares
+                dfTicker.loc[index, "CostAmount"] = round(row["Close"] * accumulated_shares, 2)
                 dfTicker.loc[index, "Accumulated"] = 0
             else:
                 dfTicker.loc[index, "TradeType"] = "none"
