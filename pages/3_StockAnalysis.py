@@ -3,7 +3,7 @@ import plotly.figure_factory as ff
 import pandas as pd
 import numpy as np
 from st_aggrid import GridOptionsBuilder, AgGrid, GridUpdateMode, DataReturnMode
-import Home
+import XYZ
 import Utils
 import Models
 import plotly.graph_objects as go
@@ -207,7 +207,7 @@ def init(key, plot=False,):
             for rowticker in grid_response['selected_rows']:
                 print(f'row ticker of ticker  is {rowticker["Ticker"]}')
                 st.session_state.lstTickers.append(rowticker["Ticker"])
-            dfTickers = Home.LoadTickersData(st.session_state.lstTickers)
+            dfTickers = XYZ.LoadTickersData(st.session_state.lstTickers)
             print(f'lstTickers is {st.session_state.lstTickers}')
 
     st.header("Symbol Analysis - SA")    
@@ -217,7 +217,7 @@ def init(key, plot=False,):
     st.session_state.selTicker = st.selectbox('Select Ticker to Analyze', options=st.session_state.lstTickers)
     print(st.session_state.selTicker)
     if(st.session_state.selTicker is not None and len(st.session_state.selTicker)>0):
-        st.session_state.company = Home.GetCompanyDetails(st.session_state.selTicker)      
+        st.session_state.company = XYZ.GetCompanyDetails(st.session_state.selTicker)      
     
     tabTickerData, tabCloseData, tabVolumeData, tabCloseVolumeData, tabOHLC = st.tabs(["Ticker Data", 'Close Data', 'Volume Data', 'CloseAndVolume', 'OHLC'])
     with tabTickerData:
@@ -375,6 +375,3 @@ def init(key, plot=False,):
                 st.plotly_chart(chtInd20MA, use_container_width=True)
         except Exception as ex:    
             st.write(f"Exception {ex}")               
-
-
-init()
