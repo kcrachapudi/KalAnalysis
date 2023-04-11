@@ -5,6 +5,7 @@ import numpy as np
 import datetime
 import traceback
 
+
 def get_download_details():
     download_date = None
     try:
@@ -29,15 +30,14 @@ def GetCSVDataFromResources(fileName, indexCol):
         traceback.print_exc()      
     return dfData
 
+
 def GetLocalTickerData(ticker):
     dfTickerData = None
     try:
         absdir = Path(__file__).parent.absolute()
-        csvreadname = ticker + '_Ticker_Data.csv'
-        #print(f'Processing {csvreadname}')
+        csvreadname = ticker + '.csv'
         csvreadpath = Path(f'{absdir}/TickerData/{csvreadname}')
         dfTickerData = pd.read_csv(Path(csvreadpath), index_col='Date', parse_dates=True, infer_datetime_format=True)
-        #dfTickerData.rename(columns = {ticker:'Close'}, inplace = True)
     except Exception as ex:
         print(f'Error in getting ticker close data for ticker {ticker}. Error is {ex}')      
         traceback.print_exc()      
@@ -63,7 +63,7 @@ def save_download_details():
 
 def SaveTickerData(ticker, dfTicker):
     absdir = Path(__file__).parent.absolute()
-    csvwritename = ticker +'_Ticker_Data.csv'
+    csvwritename = ticker +'.csv'
     csvwritepath = Path(f'{absdir}/TickerData/{csvwritename}')
     dfTicker.to_csv(csvwritepath) 
 

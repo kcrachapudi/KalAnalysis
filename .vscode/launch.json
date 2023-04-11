@@ -5,12 +5,21 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "Python: Attach",
+            "type": "python",
+            "request": "attach",
+            "connect": {
+              "host": "localhost",
+              "port": 5678
+            }
+        },
+        {
             "name": "Python: Remote Attach",
             "type": "python",
             "request": "attach",
             "connect": {
                 "host": "localhost",
-                "port": 5678
+                "port": 8501
             },
             "pathMappings": [
                 {
@@ -38,7 +47,7 @@
             "args": [
                 "streamlit",
                 "run",
-                "app.py"
+                "Home.py"
             ]
         }
     ]
