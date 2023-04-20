@@ -19,7 +19,7 @@ Fun AI based Quant Stock and Crypto Analysis to analyze trends and predict outco
 )
 
 
-""" Simple Stock Trade Algorithms"""
+""" Simple Stock Long Trade Algorithms"""
 
 ticker = None
 tickerdetails = None
@@ -42,13 +42,17 @@ def Init():
         st.dataframe(dfTicker, 1000, 300)
         tabSimpleStockAlgo1, tabSimpleStockAlgo2 = st.tabs(["DailyBuySell", "DailyBuySellLast"])
         with tabSimpleStockAlgo1:
-            dfTicker, TotalProfitLoss = Algo_Stock_Long_Simple_DailyBuySell.Init(dfTicker)
+            dfTicker, TotalProfitLoss, InvestedCapital, ROI = Algo_Stock_Long_Simple_DailyBuySell.Init(dfTicker)
             st.dataframe(dfTicker, 1000, 300)
             st.write(f"The total profit/loss of the trading strategy is ${TotalProfitLoss}.")
+            st.write(f"The Invested Capital of the trading strategy is ${InvestedCapital}.")
+            st.write(f"The Return on Investment of the algorithm is {ROI}%")
         with tabSimpleStockAlgo2:
-            dfTicker, TotalProfitLoss = Algo_Stock_Long_Simple_DailyBuySellLast.Init(dfTicker)
-            st.dataframe(dfTicker, 1000, 300)
-            st.write(f"The total profit/loss of the trading strategy is ${TotalProfitLoss}.")
+            dfTicker2, TotalProfitLoss2, InvestedCapital2, ROI2 = Algo_Stock_Long_Simple_DailyBuySellLast.Init(dfTicker)
+            st.dataframe(dfTicker2, 1000, 300)
+            st.write(f"The total profit/loss of the trading strategy is ${TotalProfitLoss2}.")
+            st.write(f"The Invested Capital of the trading strategy is ${InvestedCapital2}.")
+            st.write(f"The Return on Investment of the algorithm is {ROI2}%")
 
 def GetSelectedTicker():
         ticker = 'NVDA'

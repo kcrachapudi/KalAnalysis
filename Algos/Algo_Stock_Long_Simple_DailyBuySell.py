@@ -38,8 +38,8 @@ def Init(dfTicker):
 
     dfTicker["Accumulated"] = 0
 
-    # Initialize a CostAmount column for recording trade metrics
-    dfTicker["CostAmount"] = 0
+    # Initialize a CostProceeds column for recording trade metrics
+    dfTicker["CostProceeds"] = 0
 
 
     # Initialize share size and accumulated Shares
@@ -53,19 +53,19 @@ def Init(dfTicker):
     for index, row in dfTicker.iterrows():
         
         # buy if the previous price is 0, in other words, buy on the first day
-        # set the CostAmount column equal to the negative value of the row Close price multiplied by the quantity
+        # set the CostProceeds column equal to the negative value of the row Close price multiplied by the quantity
         if previous_price == 0:
             dfTicker.loc[index, "TradeType"] = "buy"
-            dfTicker.loc[index, "CostAmount"] = round(-(row["Close"] * quantity), 2)
+            dfTicker.loc[index, "CostProceeds"] = round(-(row["Close"] * quantity), 2)
             accumulated_shares += quantity
             dfTicker.loc[index, "Accumulated"] = accumulated_shares
 
         # buy if the current day price is less than the previous day price
-        # set the CostAmount column equal to the negative value of the row Close price
+        # set the CostProceeds column equal to the negative value of the row Close price
         # multiplied by the quantity
         elif row["Close"] < previous_price:
             dfTicker.loc[index, "TradeType"] = "buy"
-            dfTicker.loc[index, "CostAmount"] = round(-(row["Close"] * quantity), 2)
+            dfTicker.loc[index, "CostProceeds"] = round(-(row["Close"] * quantity), 2)
             accumulated_shares += quantity
             dfTicker.loc[index, "Accumulated"] = accumulated_shares
         
@@ -73,12 +73,12 @@ def Init(dfTicker):
         elif row["Close"] > previous_price:
             if(accumulated_shares>0):
                 dfTicker.loc[index, "TradeType"] = "sell"
-                dfTicker.loc[index, "CostAmount"] = round(row["Close"] * quantity, 2)
+                dfTicker.loc[index, "CostProceeds"] = round(row["Close"] * quantity, 2)
                 accumulated_shares -= quantity
                 dfTicker.loc[index, "Accumulated"] = accumulated_shares
             else:
                 dfTicker.loc[index, "TradeType"] = "none"
-                dfTicker.loc[index, "CostAmount"] = row["Close"] * 0
+                dfTicker.loc[index, "CostProceeds"] = row["Close"] * 0
                 dfTicker.loc[index, "Accumulated"] = accumulated_shares
 
         # hold if the current day price is equal to the previous day price
@@ -89,19 +89,31 @@ def Init(dfTicker):
         previous_price = row["Close"]
         
         # if the index is the last index of the Dataframe, sell
-        # set the CostAmount column equal to the row Close price multiplied by the accumulated_shares
+        # set the CostProceeds column equal to the row Close price multiplied by the accumulated_shares
         if index == dfTicker.index[-1]:
             if(accumulated_shares>0):
                 dfTicker.loc[index, "TradeType"] = "sell"
-                dfTicker.loc[index, "CostAmount"] = round(row["Close"] * accumulated_shares, 2)
+                dfTicker.loc[index, "CostProceeds"] = round(row["Close"] * accumulated_shares, 2)
                 dfTicker.loc[index, "Accumulated"] = 0
             else:
                 dfTicker.loc[index, "TradeType"] = "none"
-                dfTicker.loc[index, "CostAmount"] = 0
+                dfTicker.loc[index, "CostProceeds"] = 0
                 dfTicker.loc[index, "Accumulated"] = 0
 
-    TotalProfitLoss = round(dfTicker["CostAmount"].sum(), 2)
-    
-    # Review the DataFrame
-    return dfTicker, TotalProfitLoss
+    TotalProfitLoss = round(dfTicker["CostProceeds"].sum(), 2)
+
+    # Initialize the variable to hold the value of the invested capital
+    InvestedCapital = 0
+    # Calculate the invested capital by adding the cost of all buy trades
+    for index, row in dfTicker.iterrows():
+        if row["TradeType"] == "buy":
+            InvestedCapital = InvestedCapital + row["CostProceeds"]
+
+    # We have set the CostProceeds to be negative, so we are reversing the total invested capital here to positive
+    InvestedCapital = -(InvestedCapital)
+
+    # Calculate the return on investment (ROI)
+    ROI = round((TotalProfitLoss / (InvestedCapital)) * 100, 2)
+
+    return dfTicker, TotalProfitLoss, InvestedCapital, ROI
 
