@@ -43,9 +43,9 @@
             "request": "launch",
             "console": "integratedTerminal",
             "justMyCode": true,
-            "program": "${file}",
+            "program": "C:\\Projects\\KalAnalysis\\KalEnv\\Scripts\\streamlit.exe",
             "args": [
-                "streamlit",
+                //"streamlit",
                 "run",
                 "Home.py"
             ]
