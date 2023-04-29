@@ -51,43 +51,46 @@ with st.spinner('Retrieving and loading Stock Data...'):
         st.write('Review the Signals DataFrame with Entry/Exit')
         #signals_df.loc["2015-02-09":"2015-02-17"]
         st.write(signals_df.tail(30))
-        # Visualize exit position relative to close price
+        st.write('Visualize exit position relative to close price')
         exitplot = signals_df[signals_df['Entry/Exit'] == -1.0]['close'].hvplot.scatter(
             color="red",
             legend=False,
             ylabel='Price in $',
             width=1000,
-            height=400)
+            height=400,
+            marker='v')
 
         # Show the plot
         st.write(hv.render(exitplot, backend='bokeh'))
 
-        # Visualize entry position relative to close price
+        st.write('Visualize entry position relative to close price')
         entryplot = signals_df[signals_df['Entry/Exit'] == 1.0]['close'].hvplot.scatter(
             color='green',
             legend=False,
             ylabel='Price in $',
             width=1000,
-            height=400)
+            height=400,
+            marker='^')
 
         # Show the plot
         st.write(hv.render(entryplot, backend='bokeh'))
 
-        # Visualize close price for the investment
-        #closeplot = signals_df[['close']].hvplot(
-        #    line_color="'lightgray",
-        #    ylabel="Price in $",
-        #    width=1000,
-        #    height=400)
+        st.write('Visualize close price for the investment')
+        closeplot = signals_df[['close']].hvplot.line(
+            line_color="lightgray",
+            ylabel="Close Price",
+            width=1000,
+            height=400)
+        st.write(hv.render(closeplot, backend='bokeh'))
 
-        # Show the plot
-        #security_close
+        st.write('Visualize moving averages')
+        moving_avgs_plot = signals_df[['SMA50', 'SMA100']].hvplot.line(
+            ylabel='Close Price',
+            width=1000,
+            height=400)
+        st.write(hv.render(moving_avgs_plot, backend='bokeh'))
 
-        # Visualize moving averages
-        #moving_avgs = signals_df[['SMA50', 'SMA100']].hvplot(
-        #    ylabel='Price in $',
-        #    width=1000,
-        #    height=400)
-
-        # Show the plot
-        #moving_avgs
+        st.write('Create the overlay plot')
+        full_plot = closeplot * moving_avgs_plot * entryplot * exitplot
+        full_plot.opts(title="SMA50, SMA100, Entry and Exit Points")
+        st.write(hv.render(full_plot, backend='bokeh'))
