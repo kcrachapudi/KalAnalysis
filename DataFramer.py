@@ -8,7 +8,7 @@ import numbers
 
 
 def GetNumericColumnMax(dfData, colName, roundNum=-1):
-    value = 0
+    value = 0.0
     try:
         if(dfData is not None):
             value = dfData[colName].max()     
@@ -19,7 +19,7 @@ def GetNumericColumnMax(dfData, colName, roundNum=-1):
     return value
 
 def GetNumericColumnMin(dfData, colName, roundNum=-1):
-    value = 0
+    value = 0.0
     try:
         if(dfData is not None):
             value = dfData[colName].min()        
@@ -30,7 +30,7 @@ def GetNumericColumnMin(dfData, colName, roundNum=-1):
     return value
 
 def GetNumericColumnFirst(dfData, colName, roundNum=-1):
-    value = 0
+    value = 0.0
     try:
         if(dfData is not None):
             value = dfData[colName].iloc[0]        
@@ -41,7 +41,7 @@ def GetNumericColumnFirst(dfData, colName, roundNum=-1):
     return value
 
 def GetNumericColumnLast(dfData, colName, roundNum=-1):
-    value = 0
+    value = 0.0
     try:
         if(dfData is not None):
             value = dfData[colName].iloc[-1]        

@@ -12,6 +12,7 @@ import holoviews as hv
 import numpy as np
 import DataFramer
 import Aggridder
+import BackTester
 
 with st.spinner('Retrieving and loading Stock Data...'):
     st.write("CSV Data loaded into DataFrame")
@@ -104,89 +105,7 @@ with st.spinner('Retrieving and loading Stock Data...'):
         # Set the share size
         share_size = 500
         st.write(f'ShareSize is {share_size}')
-        st.write('BackTest Processing of Algorithm...')
-        # Buy a 500 share position when the dual moving average crossover Signal equals 1 (SMA50 is greater than SMA100)
-        # Sell a 500 share position when the dual moving average crossover Signal equals 0 (SMA50 is less than SMA100)
-        signals_df['Position'] = share_size * signals_df['Signal']
 
-        # Determine the points in time where a 500 share position is bought or sold
-        signals_df['TradePosition'] = signals_df['Position'].diff()
+        BackTester.BackTesterInit(dfData=signals_df, initialCapital=initial_capital, shareSize=share_size)
 
-        # Multiply the close price by the number of shares held, or the Position
-        signals_df['PortfolioHoldings'] = signals_df['close'] * signals_df['Position']
-
-        # Subtract the amount of either the cost or proceeds of the trade from the initial capital invested
-        signals_df['PortfolioCash'] = initial_capital - (signals_df['close'] * signals_df['TradePosition']).cumsum()
-
-        # Calculate the total portfolio value by adding the portfolio cash to the portfolio holdings (or investments)
-        signals_df['PortfolioValue'] = signals_df['PortfolioCash'] + signals_df['PortfolioHoldings']
-
-        # Calculate the portfolio daily returns
-        signals_df['PortfolioDailyReturns'] = signals_df['PortfolioValue'].pct_change()
-
-        # Calculate the portfolio cumulative returns
-        signals_df['PortfolioCumulativeReturns'] = (1 + signals_df['PortfolioDailyReturns']).cumprod() - 1
-
-        st.write('BackTest Processing COMPLETED...')
-        st.write(signals_df.head())
-        st.write(signals_df.tail())
-
-        st.write('Visualize exit position relative to total portfolio value')
-        backtestexitplot = signals_df[signals_df['Entry/Exit'] == -1.0]['PortfolioValue'].hvplot.scatter(
-            color='red',
-            marker='v',
-            legend=False,
-            ylabel='Total Portfolio Value',
-            width=1000,
-            height=400
-        )
-        st.write(hv.render(backtestexitplot, backend='bokeh'))
-
-        st.write('Visualize entry position relative to total portfolio value')
-        backtestentryplot = signals_df[signals_df['Entry/Exit'] == 1.0]['PortfolioValue'].hvplot.scatter(
-            color='green',
-            marker='^',
-            ylabel='Total Portfolio Value',
-            width=1000,
-            height=400
-        )
-        st.write(hv.render(backtestentryplot, backend='bokeh'))
-
-        st.write('Visualize the value of the total portfolio')
-        total_portfolio_value_plot = signals_df[['PortfolioValue']].hvplot.line(
-            line_color='lightgray',
-            ylabel='Total Portfolio Value',
-            xlabel='Date',
-            width=1000,
-            height=400
-        )
-        st.write(hv.render(total_portfolio_value_plot, backend='bokeh'))
-
-        st.write('Total Portolio Overview')
-        portfolio_plot = total_portfolio_value_plot * backtestentryplot * backtestexitplot
-        portfolio_plot.opts(
-            title="Apple Algorithm - Total Portfolio Value",
-            yformatter='%.0f'
-        )
-        st.write(hv.render(portfolio_plot, backend='bokeh'))
-
-        st.write('Back Test Analysis')
-        portfolio_max =  round(signals_df['PortfolioValue'].max())
-        st.write(f'Maximum Portfolio Value is { portfolio_max}')
-        portfolio_min = round(signals_df['PortfolioValue'].min())
-        st.write(f'Minimum Portfolio Value is { portfolio_min}')
-        portfolio_final = round(signals_df['PortfolioValue'].iloc[-1])
-        st.write(f'Final Portfolio Value is { portfolio_final}')
-
-        portfolio_max2 = DataFramer.GetNumericColumnMax(signals_df, 'PortfolioValue', 2)
-        st.write(f'Maximum Portfolio Value is { portfolio_max2}')
-        portfolio_min2 = DataFramer.GetNumericColumnMin(signals_df, 'PortfolioValue', 2)
-        st.write(f'Minimum Portfolio Value is { portfolio_min2}')
-        portfolio_init2 = DataFramer.GetNumericColumnFirst(signals_df, "PortfolioValue", 2)
-        st.write(f'Initial Portfolio Value is { portfolio_init2}')
-        portfolio_final2 = DataFramer.GetNumericColumnLast(signals_df, "PortfolioValue", 2)
-        st.write(f'Final Portfolio Value is { portfolio_final2}')
-
-        signals_Aggrid = Aggridder.GetAggrid(signals_df)
-        st.table(signals_df)
         st.write('Completed Analysis')

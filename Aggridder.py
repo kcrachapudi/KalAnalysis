@@ -4,6 +4,7 @@ import numpy as np
 from st_aggrid import GridOptionsBuilder, AgGrid, GridUpdateMode, DataReturnMode
 
 def GetAggrid(dfData):
+    dfData = dfData.reset_index() # This is to make sure the index column also shows up in the Grid, otherwise index column is ignored
     gb = GridOptionsBuilder.from_dataframe(dfData)
     #gb.configure_pagination(paginationAutoPageSize=True) #Add pagination
     gb.configure_side_bar() #Add a sidebar
