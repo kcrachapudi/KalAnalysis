@@ -16,3 +16,5 @@ st.write(dfSignals.tail(10))
 dfInitialEvaluated = BackTestInitial.Evaluate(dfSignals=dfSignals)
 
 dfFinalEvaluated = BackTestFinal.Evaluate(dfData=dfSignals)
+
+st.write('Note: We often consider a trading algorithm to be good if it consistently maximizes its gains while minimizing its losses. A Sharpe ratio that’s greater than 1 and a trading accuracy that’s greater than 80% are popular baselines.')

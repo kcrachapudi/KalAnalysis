@@ -57,10 +57,6 @@ def Evaluate(dfData):
                 ignore_index=True)
 
     # Print the DataFrame
-    st.write(dfTradeEvaluator)
-    #trade_eval_Aggrid = Aggridder.GetAggrid(dfTradeEvaluator)
-    #rade_eval_Aggrid2 = Aggridder.GetAggrid(dfTradeEvaluator, True, True)
-    st.write('Detailed Analysis')
 
     TotalTrades:int = dfTradeEvaluator.shape[0]
     ProfitTrades:int = (dfTradeEvaluator['Profit/Loss'] > 0).sum()
@@ -69,16 +65,20 @@ def Evaluate(dfData):
     MaxSingleTradeProfit = dfTradeEvaluator['Profit/Loss'].max()
     MaxSingleTradeLoss = dfTradeEvaluator['Profit/Loss'].min()
     dfProfits = dfTradeEvaluator.loc[dfTradeEvaluator['Profit/Loss']>0]
-    st.write(dfProfits)
+
     dfLosses = dfTradeEvaluator.loc[dfTradeEvaluator['Profit/Loss']<0]
-    st.write(dfLosses)
 
     MinSingleTradeProfit = dfProfits.iloc[:,8].min()
     MinSingleTradeLoss = dfLosses.iloc[:,8].max()
 
     st.write(f'The Trading Algorithm made {TotalTrades} trades')
+    st.write(dfTradeEvaluator)
+
     st.write(f'Profitable Trades were {ProfitTrades}')
+    st.write(dfProfits)
     st.write(f'Unprofitable Trades were {LossTrades}')
+    st.write(dfLosses)
+
     st.write(f'Trade Accuracy (percentage of profitable trades to total trades) is {TradeAccuracy}')
     st.write(f'The Maximum gain on any trade was {MaxSingleTradeProfit}')
     st.write(f'The Maximum loss on any trade was {MaxSingleTradeLoss}')
