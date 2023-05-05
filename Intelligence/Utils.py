@@ -19,11 +19,11 @@ def get_download_details():
         print(f'Error in getting Download date {ex}')            
     return download_date
 
-def GetCSVDataFromResources(fileName, indexCol):
-    dfData = None
+def GetCSVDataFromResources(fileName, indexCol) -> pd.DataFrame:
+    dfData:pd.DataFrame = pd.DataFrame()
     try:
         absdir = Path(__file__).parent.absolute()
-        csvreadpath = Path(f'{absdir}/Resources/{fileName}')
+        csvreadpath = Path(f'{absdir}/../Resources/{fileName}')
         dfData = pd.read_csv(Path(csvreadpath), index_col=indexCol, parse_dates=True, infer_datetime_format=True)
     except Exception as ex:
         print(f'Error in getting csv data for {fileName} . Error is {ex}')      
