@@ -5,7 +5,7 @@ import numpy as np
 from st_aggrid import GridOptionsBuilder, AgGrid, GridUpdateMode, DataReturnMode
 from Algos import Algo_Stock_Long_Simple_DailyBuySell, Algo_Stock_Long_Simple_DailyBuySellLast
 import cloud_data_collector
-import Utils
+from Intelligence import Utils
 import Models
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
