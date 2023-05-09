@@ -17,7 +17,7 @@ class FinAISMAAlgo:
         self.long_window:int = longWindow
         self.dfTrades:pd.DataFrame = trades_df
         self.X:pd.DataFrame
-        self.y
+        self.y = None
         self.trainDataPeriodmonths =train_data_period_months
         self.training_begin = None
         self.training_end = None
@@ -32,12 +32,10 @@ class FinAISMAAlgo:
         self.modelType = model_type 
         self.model = None
         self.dfPredictions:pd.DataFrame
-
-
-    def CreateModel(self):
-        if(self.modelType == "SVM"):
-            self.model = svm.SVC()
-
+        self.CreateFeatureSets()
+        self.CreateTargetSets()
+        self.GenerateAndScaleTrains()
+        self.MLProcess()
 
     def CreateFeatureSets(self):
         st.text_area('Create the Features Set', " Think back to the dual moving average crossover (DMAC) trading algorithm that you generated in the previous lessons. You used a single trading signal to determine the entry and exit points for the algorithm. (That trading signal was the crossover point between the short-window and long-window SMAs.) The lesson demonstrations used the data to generate trading signals for holding long positions. By contrast, the activities used the trading signals to initiate short-position trades—first selling stock and then buying it to cover the sale, ideally at a lower price. For our machine learning–powered trading algorithm, the trading signals will make up the features set.")
@@ -125,7 +123,7 @@ class FinAISMAAlgo:
         st.text_area('ML11','We now fit the model to the X_train_scaled and y_train data. As we’ve noted with other machine learning models, the model learns from the training dataset and makes predictions based on the testing dataset, which is X_test_scaled in this case. The training_signal_predictions variable will contain our predicted values, which will exist in an array of 1 and −1 values.')
         st.write('The following code fits the model:')
         st.write('Create the classifier model')
-        self.model = self.CreateModel()
+        self.CreateModel()
         st.write('Fit the model to the data using X_train_scaled and y_train')
         self.model = self.model.fit(self.X_train_scaled, self.y_train)
         st.write(' Use the trained model to predict the trading signals for the training data')
@@ -165,3 +163,7 @@ class FinAISMAAlgo:
                     height=400)
         st.write(hv.render(cumprodplot, backend='bokeh'))
         st.text_area('ML15', 'Notice that our SVM model performed well from the beginning of the period until early in 2020. That’s when the actual and predicted returns start to greatly differ. To truly find out how well this model works, however, we need to fit it to different sets of pricing data, have it make predictions, backtest it, and then evaluate it against the actual performance of the asset with that trading strategy. backtesting the SMA long-short trading strategy using the SVM model provides an interesting example of the predictive power of machine learning. The SVM model made trading decisions that strongly outperformed the actual returns in some market scenarios, as illustrated by the steep rise in the trading_algorithm_returns plot line. However, sometimes the SVM model also made decisions that underperformed relative to the actual returns, as illustrated by the steep decline in the trading_algorithm_returns plot line. Overall, the SVM models trading decisions, though more volatile, produced a higher cumulative return value than the original trading strategys actual returns.')
+
+    def CreateModel(self):
+        if(self.modelType == "SVM"):
+            self.model = svm.SVC()
