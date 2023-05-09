@@ -8,10 +8,9 @@ from pandas.tseries.offsets import DateOffset
 from sklearn.preprocessing import StandardScaler
 from sklearn import svm
 from sklearn.metrics import classification_report
-from typing import NamedTuple
+from enum import StrEnum
 
 class FinAISMAAlgo:
-    NamedTuple ModelTypes = ["SVM"]
     
     def __init__(self, trades_df, shortWindow, longWindow, model_type, train_data_period_months):
         self.short_window:int = shortWindow
@@ -33,6 +32,7 @@ class FinAISMAAlgo:
         self.modelType = model_type 
         self.model = None
         self.dfPredictions:pd.DataFrame
+
 
     def CreateModel(self):
         if(self.modelType == "SVM"):
