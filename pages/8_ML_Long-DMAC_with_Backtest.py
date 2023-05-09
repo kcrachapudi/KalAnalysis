@@ -1,8 +1,9 @@
 # Import the required libraries and dependencies
+import imp
 import streamlit as st
 from fileinput import filename
 import pandas as pd
-from Intelligence import BackTestFinal, BackTestInitial, Utils
+from Intelligence import BackTestFinal, BackTestInitial, Utils, DataPreparer
 import holoviews as hv
 
 import numpy as np
@@ -11,7 +12,7 @@ from pandas.tseries.offsets import DateOffset
 from sklearn.preprocessing import StandardScaler
 from sklearn import svm
 from sklearn.metrics import classification_report
-
+from AIML import Fin_AI_SMA_Algo
 
 dfTrades:pd.DataFrame = Utils.GetCSVDataFromResources("ml_ohlcv.csv", "Date")
 
@@ -19,15 +20,11 @@ st.write(' Review the DataFrame')
 st.write(dfTrades.head())
 st.write(dfTrades.tail())
 
-st.write('Use the Pandas pct_change function to calculate the daily returns from the closing prices. We assign these values to a new column named “actual_returns”, as the following code shows:')
-st.write(' Calculate the daily returns using the closing prices and the pct_change function')
-dfTrades["ActualReturns"] = dfTrades["Close"].pct_change()
+st.write(' Preparing the Data ')
+dfTrades = DataPreparer.PrepareBasicEquityCloseData(dfData=dfTrades)
 st.write(dfTrades.head())
 
-st.write(' Drop all NaN values from the DataFrame')
-dfTrades = dfTrades.dropna()
-st.write(dfTrades.head())
-
+aialgo = Fin_AI_SMA_Algo.FinAISMAAlgo(dfTrades=dfTrades, shortWindow=4, longWindow=100,model_type=Fin_AI_SMA_Algo.FinAISMAAlgo.ModelTypes.))
 
 st.text_area('Create the Features Set', " Think back to the dual moving average crossover (DMAC) trading algorithm that you generated in the previous lessons. You used a single trading signal to determine the entry and exit points for the algorithm. (That trading signal was the crossover point between the short-window and long-window SMAs.) The lesson demonstrations used the data to generate trading signals for holding long positions. By contrast, the activities used the trading signals to initiate short-position trades—first selling stock and then buying it to cover the sale, ideally at a lower price. For our machine learning–powered trading algorithm, the trading signals will make up the features set.")
 st.text_area('ML2', "Our new trading algorithm will continue to use the same short- and long-window SMA logic, but with a slight difference. We’ll create an SMA column using a window size of 4 days, and name it “sma_fast”. We’ll create another SMA column using a window size of 100 days, and name it sma_slow")
