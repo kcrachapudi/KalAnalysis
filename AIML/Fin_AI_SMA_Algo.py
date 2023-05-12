@@ -94,13 +94,13 @@ class FinAISMAAlgo:
 
     def GenerateXYTrainAndTestDataSets(self):
         st.text_area(f'{self.UIComponentPrefix} Split the Data into Training and Testing Sets', 'As we did with machine learning models in previous modules, we’ll split the prepared data into training and testing sets. We’ll use the training data to train the machine learning model to make buy and sell predictions. We’ll use the testing data to backtest the trained model—to find out how well it performs at algorithmic trading.Rather than using train_test_split from scikit-learn to create the training and testing sets, as we did in the previous modules, we’ll split the data into training and testing sets by using date windows.')
-        st.text_area(f'{self.UIComponentPrefix} Import the DateOffset Module', 'For this demo, our training data will contain only a portion of the entire dataset—specifically, three months’ worth. We therefore need to create a date offset of three months. To do so, we first need to import the DateOffset module from pandas.tseries.offsets, as the following code shows:')
+        st.text_area(f'{self.UIComponentPrefix} Import the DateOffset Module', f'For this demo, our training data will contain only a portion of the entire dataset—specifically, {self.trainDataPeriodmonths} months’ worth. We therefore need to create a date offset of {self.trainDataPeriodmonths} months. To do so, we first need to import the DateOffset module from pandas.tseries.offsets, as the following code shows:')
 
-        st.text_area(f'{self.UIComponentPrefix} Create the Training Datasets', 'To define the training datasets, we need to define where we want the training data values to begin and end. We first define two new variables: training_begin and training_end. We use the Pandas index.min function to set the value of training_begin to the minimum index value in the X features DataFrame. We use the DateOffset module to set the value of training_end to the minimum index value plus a date offset of three months, as the following code shows:')
+        st.text_area(f'{self.UIComponentPrefix} Create the Training Datasets', f'To define the training datasets, we need to define where we want the training data values to begin and end. We first define two new variables: training_begin and training_end. We use the Pandas index.min function to set the value of training_begin to the minimum index value in the X features DataFrame. We use the DateOffset module to set the value of training_end to the minimum index value plus a date offset of {self.trainDataPeriodmonths} months, as the following code shows:')
         st.write('Select the start of the training period')
         self.training_begin = self.X.index.min()
         st.write(f'Training_begin Date {self.training_begin}')
-        st.write('Select the ending period for the training data with an offset of 3 months')
+        st.write(f'Select the ending period for the training data with an offset of {self.trainDataPeriodmonths} months')
         self.training_end = self.X.index.min() + DateOffset(months=self.trainDataPeriodmonths)
         st.write(f'Training_end Date {self.training_end}')
 
@@ -108,15 +108,15 @@ class FinAISMAAlgo:
         st.write('Generate the X_train and y_train DataFrames')
         self.X_train = self.X.loc[self.training_begin:self.training_end]
         self.y_train = self.y.loc[self.training_begin:self.training_end]
-        st.write('Display sample data')
-        self.X_train.head()
-        st.text_area(f'{self.UIComponentPrefix} ML7','In the preceding image, notice that the first row in the X_train DataFrame includes an index value which matches the value of the training_begin variable. The row also includes values for "sma_fast" and "sma_slow".')
+        st.write('Display X_train data')
+        st.write(self.X_train.head())
+        st.text_area(f'{self.UIComponentPrefix} ML7','In the preceding notice that the first row in the X_train DataFrame includes an index value which matches the value of the training_begin variable. The row also includes values for "sma_fast" and "sma_slow".')
         st.text_area(f'{self.UIComponentPrefix} Create the Testing Datasets','We similarly create our testing datasets. The only difference when we create the X_test and y_test DataFrames occurs when we slice the data. We slice the index starting at the training_end value and ending at the last record of the datasets, as the following code shows:')
         st.write('Generate the X_test and y_test DataFrames')
         self.X_test = self.X.loc[self.training_end:]
         self.y_test = self.y.loc[self.training_end:]
         st.write('Display sample X_test data')
-        self.X_test.head()
+        st.write(self.X_test.head())
 
 
     def ScaleDataSets(self):
@@ -135,8 +135,8 @@ class FinAISMAAlgo:
 
 
     def FitModelToTrain(self):
-        st.text_area(f'{self.UIComponentPrefix} Use Machine Learning in a Trading Strategy','In this section, we use our training data to fit a machine learning model to predict the target trading signal. For this demonstration, we use the support vector machine (SVM) learning methodLinks to an external site. from SKLearn, and its SVC classifier modelLinks to an external site.. The reason is its ability to discriminate between two classes, and we want to predict whether the signal will be 1 or −1.The following code imports SVM from SKLearn:')
-        st.write(' Import the SVM model')
+        st.text_area(f'{self.UIComponentPrefix} Use Machine Learning in a Trading Strategy',f'In this section, we use our training data to fit a machine learning model to predict the target trading signal. For this demonstration, we use the {self.modelType} learning methodLinks to an external site. from SKLearn, and its modelLinks to an external site.. The reason is its ability to discriminate between two classes, and we want to predict whether the signal will be 1 or −1.The following code imports from SKLearn:')
+        st.write(f' Import the {self.UIComponentPrefix} model')
         st.text_area(f'{self.UIComponentPrefix} ML11','We now fit the model to the X_train_scaled and y_train data. As we’ve noted with other machine learning models, the model learns from the training dataset and makes predictions based on the testing dataset, which is X_test_scaled in this case. The training_signal_predictions variable will contain our predicted values, which will exist in an array of 1 and −1 values.')
         st.write('The following code fits the model:')
         st.write('Create the classifier model')
@@ -148,14 +148,14 @@ class FinAISMAAlgo:
     def PredictTrain(self):
         st.write(' Use the trained model to predict the trading signals for the training data')
         training_signal_predictions = self.model.predict(self.X_train_scaled)
-        st.write('Display the sample predictions')
+        st.write('Display the sample training signal predictions')
         st.write(training_signal_predictions[:10])
         st.write('Now that we have generated predictions from our training data, we evaluate the results by using the clasification_report module from scikit-learn, as the following code shows:')
         st.write('Import the required module -> from sklearn.metrics import classification_report')
         st.write('Evaluate the model using a classification report')
-        training_report = classification_report(self.y_train, training_signal_predictions)
-        st.write(training_report)
-        st.text_area(f'{self.UIComponentPrefix} ML12','Notice that the precision is 0.55 for the −1 class and 0.52 for the 1 class. The recall is 0.17 for the −1 class and 0.87 for the 1 class. Based on the higher recall, it seems that the model (based on the training data) is better at predicting the 1 class than the −1 class.The next step is to use the testing data to backtest the trading algorithm.')
+        training_report = classification_report(self.y_train, training_signal_predictions, output_dict=True)
+        st.write(f'Training Classification Report {training_report}')
+        st.text_area(f'{self.UIComponentPrefix} ML12',f'Notice that the precision is 0.55 for the −1 class and 0.52 for the 1 class. The recall is 0.17 for the −1 class and 0.87 for the 1 class. Based on the higher recall, it seems that the model (based on the training data) is better at predicting the 1 class than the −1 class.The next step is to use the testing data to backtest the trading algorithm.')
 
 
     def PredictTest(self):
@@ -165,21 +165,20 @@ class FinAISMAAlgo:
         self.TestingSignalPredictions = self.model.predict(self.X_test_scaled)
         st.write('Now, we evaluate the ability of the model to make predictions by using a classification report, as the following code shows:')
         st.write('Evaluate the models ability to predict the trading signal for the testing data')
-        st.write('testing_report')
-        testing_report = classification_report(self.y_test, self.TestingSignalPredictions)
-        st.write(testing_report)
-        st.text_area(f'{self.UIComponentPrefix} ML13', 'Notice that the precision is 0.47 for the −1 class and 0.53 for the 1 class. The recall is 0.37 for the −1 class and 0.64 for the 1 class.We can conclude that the precision is similar for the training data and the testing data. But, the recall is much lower for the −1 class of the training data (0.17 vs. 0.37) and much higher for the 1 class (0.87 vs. 0.64). Overall, the accuracy score for the recall is only slightly better for the training data, at 0.53, than for the testing data, at 0.51.')
+        testing_report = classification_report(self.y_test, self.TestingSignalPredictions, output_dict=True)
+        st.write(f'Testing Classification Report {testing_report}')
+        st.text_area(f'{self.UIComponentPrefix} ML13', f'Notice that the precision is 0.47 for the −1 class and 0.53 for the 1 class. The recall is 0.37 for the −1 class and 0.64 for the 1 class.We can conclude that the precision is similar for the training data and the testing data. But, the recall is much lower for the −1 class of the training data (0.17 vs. 0.37) and much higher for the 1 class (0.87 vs. 0.64). Overall, the accuracy score for the recall is only slightly better for the training data, at 0.53, than for the testing data, at 0.51.')
 
 
     def AnalyzePredictions(self):
-        st.text_area(f'{self.UIComponentPrefix} Compare the Actual and Predicted Returns','From the classification reports, we can observe that the accuracy of the model is about 0.50, or 50%. For a different perspective on the model’s performance, we’ll create a plot to visually compare the actual and predicted returns.Let’s start by creating a new DataFrame with the actual and predicted returns, as the following code shows:')
+        st.text_area(f'{self.UIComponentPrefix} Compare the Actual and Predicted Returns',f'From the classification reports, we can observe that the accuracy of the model is about 0.50, or 50%. For a different perspective on the model’s performance, we’ll create a plot to visually compare the actual and predicted returns.Let’s start by creating a new DataFrame with the actual and predicted returns, as the following code shows:')
         st.write('Create a predictions DataFrame')
         self.dfPredictions = pd.DataFrame(index=self.X_test.index)
         self.dfPredictions["predicted_signal"] = self.TestingSignalPredictions
         self.dfPredictions["actual_returns"] = self.dfTrades["ActualReturns"]
         self.dfPredictions["trading_algorithm_returns"] = (self.dfPredictions["actual_returns"] * self.dfPredictions["predicted_signal"])
         self.dfPredictions.head()
-        st.text_area(f'{self.UIComponentPrefix} ML14', 'Notice that the DataFrame has “predicted_signal”, “actual_returns”, and “trading_algorithm_returns” columns.Now, we plot the cumulative returns. We can then compare the actual returns to those that our SVM model predicted by using the historical data. The following code creates the overlay plot:')
+        st.text_area(f'{self.UIComponentPrefix} ML14', f'Notice that the DataFrame has “predicted_signal”, “actual_returns”, and “trading_algorithm_returns” columns.Now, we plot the cumulative returns. We can then compare the actual returns to those that our SVM model predicted by using the historical data. The following code creates the overlay plot:')
 
 
     def AnalyzeReturns(self):
