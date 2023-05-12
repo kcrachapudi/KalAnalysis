@@ -10,7 +10,7 @@ from Intelligence import BackTestFinal, Utils
 from st_aggrid import GridOptionsBuilder, AgGrid, GridUpdateMode, DataReturnMode
 import holoviews as hv
 import numpy as np
-import Aggridder
+import Intelligence.Aggridder as Aggridder
 
 def Evaluate(dfSignals) -> pd.DataFrame:
     st.write(' Create a list for the column name')

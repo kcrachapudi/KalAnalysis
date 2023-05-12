@@ -11,7 +11,7 @@ from st_aggrid import GridOptionsBuilder, AgGrid, GridUpdateMode, DataReturnMode
 import holoviews as hv
 import numpy as np
 import DataFramer
-import Aggridder
+import Intelligence.Aggridder as Aggridder
 
 def BackTesterInit(dfData, initialCapital, shareSize):
     st.write('BackTest Processing of Algorithm...')

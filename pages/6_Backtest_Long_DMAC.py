@@ -11,7 +11,7 @@ from st_aggrid import GridOptionsBuilder, AgGrid, GridUpdateMode, DataReturnMode
 import holoviews as hv
 import numpy as np
 import DataFramer
-import Aggridder
+import Intelligence.Aggridder as Aggridder
 import BackTester
 
 with st.spinner('Retrieving and loading Stock Data...'):

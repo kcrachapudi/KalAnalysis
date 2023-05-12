@@ -7,7 +7,7 @@ from Intelligence import BackTestFinal, BackTestInitial, Utils, DataPreparer
 import holoviews as hv
 
 import numpy as np
-import Aggridder
+import Intelligence.Aggridder as Aggridder
 from pandas.tseries.offsets import DateOffset
 from sklearn.preprocessing import StandardScaler
 from sklearn import svm

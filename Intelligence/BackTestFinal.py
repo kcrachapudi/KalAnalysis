@@ -4,7 +4,7 @@ import pandas as pd
 from st_aggrid import GridOptionsBuilder, AgGrid, GridUpdateMode, DataReturnMode
 import holoviews as hv
 import numpy as np
-import Aggridder
+import Intelligence.Aggridder as Aggridder
 
 def Evaluate(dfData):
     st.write('Initialize trade evaluation DataFrame with columns')

@@ -5,7 +5,7 @@ import pandas as pd
 from Intelligence import BackTestFinal, BackTestInitial, Utils
 import holoviews as hv
 import numpy as np
-import Aggridder
+import Intelligence.Aggridder as Aggridder
 
 dfSignals:pd.DataFrame = Utils.GetCSVDataFromResources("backtest-metrics.csv", "date")
 

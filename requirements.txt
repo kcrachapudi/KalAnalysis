@@ -15,7 +15,7 @@ colorcet==3.0.1
 cryptography==39.0.2
 decorator==5.1.1
 entrypoints==0.4
-frozendict==2.3.6
+frozendict==2.3.8
 gitdb==4.0.10
 GitPython==3.1.31
 holoviews==1.15.4
@@ -65,7 +65,7 @@ semver==2.13.0
 six==1.16.0
 smmap==5.0.0
 soupsieve==2.4
-streamlit==1.20.0
+streamlit==1.22.0
 streamlit-aggrid==0.3.4.post3
 tenacity==8.2.2
 threadpoolctl==3.1.0

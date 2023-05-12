@@ -34,7 +34,8 @@ class FinAISMAAlgo:
         self.dfPredictions:pd.DataFrame
         self.CreateFeatureSets()
         self.CreateTargetSets()
-        self.GenerateAndScaleTrains()
+        self.GenerateTrains()
+        self.ScaleTrains()
         self.MLProcess()
 
     def CreateFeatureSets(self):
@@ -67,7 +68,6 @@ class FinAISMAAlgo:
         st.text_area('ML4 Create the Target Set', "Because we’ll use a supervised learning algorithm, we need to create a target set of the values that we want to predict. In this case, we’ll predict a signal that indicates whether we should buy or sell.For this trading algorithm, we’ll set the signals as follows: If the actual returns are equal to or greater than zero, we’re earning money. Therefore, the signal will indicate that we should buy a position, or go long, on the stock. By contrast, if the actual returns are less than zero, we’re starting to lose money. Therefore, we want to short the stock—that is, sell it with the intention of buying it later, at a lower price, to cover the sale.Let’s return to our original DataFrame and create a new column named “signal”. For now, this column will contain zeros, as the following code shows:")
         st.write('Create a new column in the dfTrades called "signal" setting its value to zero.')
         self.dfTrades['signal'] = 0.0
-
         st.text_area('ML5', 'Using the Pandas loc function, we evaluate whether the actual returns are positive, negative, or zero. Where the “actual_returns” value is greater than or equal to zero, we set the “signal” value to 1. Where the “actual_returns” value is less than zero, we set the “signal” value to −1, as the following code shows:')
         st.write(' Create the signal to buy')
         self.dfTrades.loc[(self.dfTrades['ActualReturns'] >= 0), 'signal'] = 1
@@ -90,7 +90,7 @@ class FinAISMAAlgo:
         self.training_end = self.X.index.min() + DateOffset(months=self.trainDataPeriodmonths)
         st.write(f'Training_end Date {self.training_end}')
 
-    def GenerateAndScaleTrains(self):
+    def GenerateTrains(self):
         st.write('Now, we can generate our X_train and y_train datasets by using the loc function with our training_begin and training_end values, as the following code shows:')
         st.write('Generate the X_train and y_train DataFrames')
         self.X_train = self.X.loc[self.training_begin:self.training_end]
@@ -104,6 +104,8 @@ class FinAISMAAlgo:
         self.y_test = self.y.loc[self.training_end:]
         st.write('Display sample X_test data')
         self.X_test.head()
+
+    def ScaleTrains(self):
         st.text_area('ML8 Standardize the Data', 'With our training and testing datasets in place, the next step is to standardize the data in the X_train and X_test DataFrames by using the StandardScaler module from scikit-learn.Right now, the values of our features (that is, the X data values that we’ll use to make predictions) aren’t standardized. If certain “sma_fast” and “sma_slow” values are very high, that might skew our model’s ability to develop accurate predictions. So, like with most machine learning applications, we should first standardize, or scale, our feature data.')
         st.write('We can standardize data by subtracting the average from each feature and then dividing by the standard deviation of the feature.')
         st.text_area('ML9','As before, we use the StandardScaler module to transform our X_train and X_test datasets. To do so, we import the StandardScaler module from sklearn.preprocessing, instantiate a new StandardScaler instance, and then fit it to our X_train dataset, as the following code shows:')
