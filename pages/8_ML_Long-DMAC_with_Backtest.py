@@ -19,7 +19,7 @@ st.write(
 ## Machine Learning Algorithm - DMAC with Backtest
 """
 )
-dfTrades:pd.DataFrame = Utils.GetCSVDataFromResources("ml_ohlcv.csv", "Date")
+dfTrades:pd.DataFrame = Utils.GetCSVDataFromResources("ohlcv.csv", "date")
 
 st.write(' Review the DataFrame')
 st.write(dfTrades.head())
@@ -28,6 +28,7 @@ st.write(dfTrades.tail())
 st.write(' Preparing the Data ')
 dfTrades = DataPreparer.PrepareBasicEquityCloseData(dfData=dfTrades)
 st.write(dfTrades.head())
+st.write(dfTrades.tail())
 
 dfTabParams = pd.DataFrame({"ShortWindow":[4, 50, 20],
                    "LongWindow":[100, 100, 90],
@@ -38,14 +39,16 @@ dfTabParams = pd.DataFrame({"ShortWindow":[4, 50, 20],
 algosma4and100, algosma50and100, algosma20and90 = st.tabs(["AlgoSMA4and100", "AlgoSMA50and100", 'AlgoSMA20and90'])
 
 with algosma4and100:
-    Fin_AI_SMA_Algo.FinAISMAAlgo(trades_df=dfTrades, 
+    Fin_AI_SMA_Algo.FinAISMAAlgo(trades_df=dfTrades,
+                                 closeColName='close',
                                  shortWindow=dfTabParams.at[0, 'ShortWindow'], 
                                  longWindow=dfTabParams.at[0, 'LongWindow'],
                                  model_type=dfTabParams.at[0, 'ModelType'], 
                                  train_data_period_months=dfTabParams.at[0, 'TrainPeriodMonths'],
                                  ui_component_prefix=dfTabParams.at[0, 'UIComponentPrefix'])
 with algosma50and100:
-    Fin_AI_SMA_Algo.FinAISMAAlgo(trades_df=dfTrades, 
+    Fin_AI_SMA_Algo.FinAISMAAlgo(trades_df=dfTrades,
+                                 closeColName='close',
                                  shortWindow=dfTabParams.at[1, 'ShortWindow'], 
                                  longWindow=dfTabParams.at[1, 'LongWindow'],
                                  model_type=dfTabParams.at[1, 'ModelType'], 
@@ -53,6 +56,7 @@ with algosma50and100:
                                  ui_component_prefix=dfTabParams.at[1, 'UIComponentPrefix'])
 with algosma20and90:
     Fin_AI_SMA_Algo.FinAISMAAlgo(trades_df=dfTrades, 
+                                 closeColName='close',
                                  shortWindow=dfTabParams.at[2, 'ShortWindow'], 
                                  longWindow=dfTabParams.at[2, 'LongWindow'],
                                  model_type=dfTabParams.at[2, 'ModelType'], 

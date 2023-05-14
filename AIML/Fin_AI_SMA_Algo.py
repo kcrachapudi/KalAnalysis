@@ -1,7 +1,8 @@
+from os import close
 import streamlit as st
 from fileinput import filename
 import pandas as pd
-from Intelligence import BackTestFinal, BackTestInitial, Utils, DataPreparer
+from Intelligence import BackTestFinal, BackTestInitial, Utils, DataPreparer, Helper
 import holoviews as hv
 import numpy as np
 from pandas.tseries.offsets import DateOffset
@@ -12,14 +13,19 @@ from enum import StrEnum
 
 class FinAISMAAlgo:
     
-    def __init__(self, trades_df, shortWindow, longWindow, model_type, train_data_period_months, ui_component_prefix):
+    def __init__(self, trades_df, closeColName, shortWindow, longWindow, model_type, train_data_period_months, ui_component_prefix):
         #Gather Parameters    
         self.short_window:int = shortWindow
         self.long_window:int = longWindow
         self.dfTrades:pd.DataFrame = trades_df
+        self.CloseCol = closeColName
         self.modelType = model_type 
         self.trainDataPeriodmonths =train_data_period_months
         self.UIComponentPrefix = ui_component_prefix
+        self.BuySignalKey = 'B'
+        self.BuySignalVal:int = 1
+        self.SellSignalKey = 'S'
+        self.SellSignalVal:int = -1
 
         #State
         self.X:pd.DataFrame
@@ -37,7 +43,12 @@ class FinAISMAAlgo:
         self.model = None
         self.dfPredictions:pd.DataFrame
         self.TestingSignalPredictions = None
-        
+        self.TrainingClassificationReport = None
+        self.TestingClassificationReport = None
+        self.dfTrainingReport:pd.DataFrame
+        self.dfTestingReport:pd.DataFrame
+
+        #Actions
         self.Orchestrate()
 
 
@@ -49,8 +60,10 @@ class FinAISMAAlgo:
         self.FitModelToTrain()
         self.PredictTrain()
         self.PredictTest()
+        self.AnalyzeClassificationReports()
         self.AnalyzePredictions()
-        self.AnalyzeReturns()
+        self.AnalyzePredictionsPlot()
+
 
     def CreateFeatureSets(self):
         st.text_area(f'{self.UIComponentPrefix} Create the Features Set', " Think back to the dual moving average crossover (DMAC) trading algorithm that you generated in the previous lessons. You used a single trading signal to determine the entry and exit points for the algorithm. (That trading signal was the crossover point between the short-window and long-window SMAs.) The lesson demonstrations used the data to generate trading signals for holding long positions. By contrast, the activities used the trading signals to initiate short-position trades—first selling stock and then buying it to cover the sale, ideally at a lower price. For our machine learning–powered trading algorithm, the trading signals will make up the features set.")
@@ -58,11 +71,11 @@ class FinAISMAAlgo:
 
         st.write("We start by creating the sma_fast column in our DataFrame, as the following code shows:")
         st.write(' Create an SMA that uses short_window, and assign it to a new column named “sma_fast”')
-        self.dfTrades['SMAFast'] = self.dfTrades['Close'].rolling(window=self.short_window).mean()
+        self.dfTrades['SMAFast'] = self.dfTrades[self.CloseCol].rolling(window=self.short_window).mean()
 
         st.write('Similarly, we create the “sma_slow” column in our DataFrame, as the following code shows:')
         st.write('Create an SMA that uses long_window, and assign it to a new column named “sma_slow” ')
-        self.dfTrades['SMASlow'] = self.dfTrades['Close'].rolling(window=self.long_window).mean()
+        self.dfTrades['SMASlow'] = self.dfTrades[self.CloseCol].rolling(window=self.long_window).mean()
 
         st.write('Drop all the NaN values by using the dropna function, as the following code shows:')
         dfTrades = self.dfTrades.dropna()
@@ -73,7 +86,7 @@ class FinAISMAAlgo:
         self.X = dfTrades[['SMAFast', 'SMASlow']].shift().dropna().copy()
         st.write('Display X data')
         st.write(self.X.head())
-
+        st.write(self.X.tail())
 
     def CreateTargetSets(self):
         st.text_area(f'{self.UIComponentPrefix} ML4 Create the Target Set', "Because we’ll use a supervised learning algorithm, we need to create a target set of the values that we want to predict. In this case, we’ll predict a signal that indicates whether we should buy or sell.For this trading algorithm, we’ll set the signals as follows: If the actual returns are equal to or greater than zero, we’re earning money. Therefore, the signal will indicate that we should buy a position, or go long, on the stock. By contrast, if the actual returns are less than zero, we’re starting to lose money. Therefore, we want to short the stock—that is, sell it with the intention of buying it later, at a lower price, to cover the sale.Let’s return to our original DataFrame and create a new column named “signal”. For now, this column will contain zeros, as the following code shows:")
@@ -81,9 +94,9 @@ class FinAISMAAlgo:
         self.dfTrades['signal'] = 0.0
         st.text_area(f'{self.UIComponentPrefix} ML5', 'Using the Pandas loc function, we evaluate whether the actual returns are positive, negative, or zero. Where the “actual_returns” value is greater than or equal to zero, we set the “signal” value to 1. Where the “actual_returns” value is less than zero, we set the “signal” value to −1, as the following code shows:')
         st.write(' Create the signal to buy')
-        self.dfTrades.loc[(self.dfTrades['ActualReturns'] >= 0), 'signal'] = 1
+        self.dfTrades.loc[(self.dfTrades['ActualReturns'] >= 0), 'signal'] = self.BuySignalKey
         st.write('Create the signal to sell')
-        self.dfTrades.loc[(self.dfTrades['ActualReturns'] < 0), 'signal'] = -1
+        self.dfTrades.loc[(self.dfTrades['ActualReturns'] < 0), 'signal'] = self.SellSignalKey
         st.write('Finally, we create the target set by copying the new “signal” column to a new Pandas Series named y, as the following code shows:')
         st.write(' Copy the new "signal" column to a new Series called `y`.')
         self.y = self.dfTrades['signal'].copy()
@@ -137,7 +150,8 @@ class FinAISMAAlgo:
     def FitModelToTrain(self):
         st.text_area(f'{self.UIComponentPrefix} Use Machine Learning in a Trading Strategy',f'In this section, we use our training data to fit a machine learning model to predict the target trading signal. For this demonstration, we use the {self.modelType} learning methodLinks to an external site. from SKLearn, and its modelLinks to an external site.. The reason is its ability to discriminate between two classes, and we want to predict whether the signal will be 1 or −1.The following code imports from SKLearn:')
         st.write(f' Import the {self.UIComponentPrefix} model')
-        st.text_area(f'{self.UIComponentPrefix} ML11','We now fit the model to the X_train_scaled and y_train data. As we’ve noted with other machine learning models, the model learns from the training dataset and makes predictions based on the testing dataset, which is X_test_scaled in this case. The training_signal_predictions variable will contain our predicted values, which will exist in an array of 1 and −1 values.')
+        st.write('We now fit the model to the X_train_scaled and y_train data. As we’ve noted with other machine learning models, the model learns from the training dataset and makes predictions based on the testing dataset, which is X_test_scaled in this case.')
+        st.write('The training_signal_predictions variable will contain our predicted values, which will exist in an array of buy and sell values.')
         st.write('The following code fits the model:')
         st.write('Create the classifier model')
         self.CreateModel()
@@ -147,15 +161,21 @@ class FinAISMAAlgo:
 
     def PredictTrain(self):
         st.write(' Use the trained model to predict the trading signals for the training data')
-        training_signal_predictions = self.model.predict(self.X_train_scaled)
+        self.TrainingSignalPredictions = self.model.predict(self.X_train_scaled)
         st.write('Display the sample training signal predictions')
-        st.write(training_signal_predictions[:10])
+        st.write(self.TrainingSignalPredictions[:10])
         st.write('Now that we have generated predictions from our training data, we evaluate the results by using the clasification_report module from scikit-learn, as the following code shows:')
         st.write('Import the required module -> from sklearn.metrics import classification_report')
         st.write('Evaluate the model using a classification report')
-        training_report = classification_report(self.y_train, training_signal_predictions, output_dict=True)
-        st.write(f'Training Classification Report {training_report}')
-        st.text_area(f'{self.UIComponentPrefix} ML12',f'Notice that the precision is 0.55 for the −1 class and 0.52 for the 1 class. The recall is 0.17 for the −1 class and 0.87 for the 1 class. Based on the higher recall, it seems that the model (based on the training data) is better at predicting the 1 class than the −1 class.The next step is to use the testing data to backtest the trading algorithm.')
+        self.TrainingClassificationReport = classification_report(self.y_train, self.TrainingSignalPredictions, output_dict=True)
+        st.write(f'Training Classification Report {self.TrainingClassificationReport}')
+        self.TrainingClassificationReport = Helper.ConvertDictionaryVals(self.TrainingClassificationReport, Helper.Round3)
+        st.write(f'Rounded Training Classification Report {self.TrainingClassificationReport}')
+        self.dfTrainingReport = pd.DataFrame(data=self.TrainingClassificationReport)
+        st.write("Training Report Details")
+        st.write(self.dfTrainingReport)
+        st.write(f'The precision is {self.dfTrainingReport.loc["precision"][self.BuySignalKey]} for the {self.BuySignalKey} class and {self.dfTrainingReport.loc["precision"][self.SellSignalKey]} for the {self.SellSignalKey} class.')
+        st.write(f'The recall is {self.dfTrainingReport.loc["recall"][self.BuySignalKey]} for the {self.BuySignalKey} class and {self.dfTrainingReport.loc["recall"][self.SellSignalKey]} for the {self.SellSignalKey} class.')
 
 
     def PredictTest(self):
@@ -163,25 +183,42 @@ class FinAISMAAlgo:
         st.write('To backtest our model, we use the trained model to predict the trading signals for the testing data, as the following code shows:')
         st.write('Use the trained model to predict the trading signals for the testing data.')
         self.TestingSignalPredictions = self.model.predict(self.X_test_scaled)
+        st.write('Display the sample testing signal predictions')
+        st.write(self.TestingSignalPredictions[:10])
         st.write('Now, we evaluate the ability of the model to make predictions by using a classification report, as the following code shows:')
         st.write('Evaluate the models ability to predict the trading signal for the testing data')
-        testing_report = classification_report(self.y_test, self.TestingSignalPredictions, output_dict=True)
-        st.write(f'Testing Classification Report {testing_report}')
-        st.text_area(f'{self.UIComponentPrefix} ML13', f'Notice that the precision is 0.47 for the −1 class and 0.53 for the 1 class. The recall is 0.37 for the −1 class and 0.64 for the 1 class.We can conclude that the precision is similar for the training data and the testing data. But, the recall is much lower for the −1 class of the training data (0.17 vs. 0.37) and much higher for the 1 class (0.87 vs. 0.64). Overall, the accuracy score for the recall is only slightly better for the training data, at 0.53, than for the testing data, at 0.51.')
+        self.TestingClassificationReport = classification_report(self.y_test, self.TestingSignalPredictions, output_dict=True)
+        st.write(f'Testing Classification Report {self.TestingClassificationReport}')
+        self.TestingClassificationReport = Helper.ConvertDictionaryVals(self.TestingClassificationReport, Helper.Round3)
+        st.write(f'Rounded Testing Classification Report {self.TestingClassificationReport}')
+        self.dfTestingReport = pd.DataFrame(data=self.TestingClassificationReport)
+        st.write("Testing Report Details")
+        st.write(self.dfTestingReport)
+        st.write(f'The precision is {self.dfTestingReport.loc["precision"][self.BuySignalKey]} for the {self.BuySignalKey} class and {self.dfTestingReport.loc["precision"][self.SellSignalKey]} for the {self.SellSignalKey} class.')
+        st.write(f'The recall is {self.dfTestingReport.loc["recall"][self.BuySignalKey]} for the {self.BuySignalKey} class and {self.dfTestingReport.loc["recall"][self.SellSignalKey]} for the {self.SellSignalKey} class.')
+
+    
+    def AnalyzeClassificationReports(self):
+        st.write(f'Compare the recall for the {self.BuySignalKey} class of the training data ({self.dfTrainingReport.loc["recall"][self.BuySignalKey]} vs. {self.dfTestingReport.loc["recall"][self.BuySignalKey]}')
+        st.write(f'Compare the recall for the {self.SellSignalKey} class of the testing data ({self.dfTrainingReport.loc["recall"][self.SellSignalKey]} vs. {self.dfTestingReport.loc["recall"][self.SellSignalKey]}.')
+        st.write(f'The accuracy score comparison for the recall training data is {self.dfTrainingReport.loc["recall"]["accuracy"]} and for testing data is {self.dfTestingReport.loc["recall"]["accuracy"]}.')
+        st.text_area(f'{self.UIComponentPrefix} Compare the Actual and Predicted Returns',f'From the classification reports, we can observe that the accuracy of the model is about 0.50, or 50%.')
 
 
     def AnalyzePredictions(self):
-        st.text_area(f'{self.UIComponentPrefix} Compare the Actual and Predicted Returns',f'From the classification reports, we can observe that the accuracy of the model is about 0.50, or 50%. For a different perspective on the model’s performance, we’ll create a plot to visually compare the actual and predicted returns.Let’s start by creating a new DataFrame with the actual and predicted returns, as the following code shows:')
+        st.write('For a different perspective on the model’s performance, we’ll create a plot to visually compare the actual and predicted returns.Let’s start by creating a new DataFrame with the actual and predicted returns, as the following code shows:')
         st.write('Create a predictions DataFrame')
         self.dfPredictions = pd.DataFrame(index=self.X_test.index)
         self.dfPredictions["predicted_signal"] = self.TestingSignalPredictions
         self.dfPredictions["actual_returns"] = self.dfTrades["ActualReturns"]
         self.dfPredictions["trading_algorithm_returns"] = (self.dfPredictions["actual_returns"] * self.dfPredictions["predicted_signal"])
-        self.dfPredictions.head()
-        st.text_area(f'{self.UIComponentPrefix} ML14', f'Notice that the DataFrame has “predicted_signal”, “actual_returns”, and “trading_algorithm_returns” columns.Now, we plot the cumulative returns. We can then compare the actual returns to those that our SVM model predicted by using the historical data. The following code creates the overlay plot:')
+        st.write(self.dfPredictions.head())
+        st.write(self.dfPredictions.tail())
+        st.text_area(f'{self.UIComponentPrefix} ML14', f'Notice that the DataFrame has “predicted_signal”, “actual_returns”, and “trading_algorithm_returns” columns.')
 
 
-    def AnalyzeReturns(self):
+    def AnalyzePredictionsPlot(self):
+        st.write('Let us plot the cumulative returns and compare the actual returns to those that our model predicted by using the historical data.')
         st.write("Calculate and plot the cumulative returns for the `actual_returns` and the `trading_algorithm_returns` ")
         st.write('cumprod -> (1 + dfPredictions[["actual_returns", "trading_algorithm_returns"]]).cumprod()')
         cumprod= (1 + self.dfPredictions[["actual_returns", "trading_algorithm_returns"]]).cumprod()
