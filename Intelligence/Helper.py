@@ -1,7 +1,9 @@
+import array
 import pandas as pd
 import numpy as np
 import datetime
 import traceback
+import array
 
 # def DictionaryRenameKeys(dict, dictKeyChanges):
 #     for item in dictKeyChanges:
@@ -30,3 +32,23 @@ def Round3(original):
         finally:
             pass
     return original
+
+def GetProcessedArrayFromArray(originalArray, func, lstFuncArgs):
+    newArray:array
+    lstArr = []
+    if(originalArray is None):
+        newArray = originalArray
+    else:
+        for val in originalArray:
+            lstArr.append(func(val, lstFuncArgs[0], lstFuncArgs[1], lstFuncArgs[2]))
+        newArray = array.array('i', lstArr)        
+    return newArray
+
+
+def CompareAndReturnInt(originalVal:str, compareVal:str, matchReturnVal:int, elseReturnVal:int):
+    intVal:int
+    if(originalVal==compareVal):
+        intVal = matchReturnVal
+    else:
+        intVal = elseReturnVal
+    return intVal

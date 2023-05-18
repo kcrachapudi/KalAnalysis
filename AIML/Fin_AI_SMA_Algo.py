@@ -7,13 +7,13 @@ import holoviews as hv
 import numpy as np
 from pandas.tseries.offsets import DateOffset
 from sklearn.preprocessing import StandardScaler
-from sklearn import svm
+from sklearn import svm, linear_model
 from sklearn.metrics import classification_report
 from enum import StrEnum
 
 class FinAISMAAlgo:
     
-    def __init__(self, trades_df, closeColName, shortWindow, longWindow, model_type, train_data_period_months, ui_component_prefix):
+    def __init__(self, trades_df, closeColName, shortWindow, longWindow, model_type, train_data_period_months, initCapital, ui_component_prefix):
         #Gather Parameters    
         self.short_window:int = shortWindow
         self.long_window:int = longWindow
@@ -26,6 +26,7 @@ class FinAISMAAlgo:
         self.BuySignalVal:int = 1
         self.SellSignalKey = 'S'
         self.SellSignalVal:int = -1
+        self.initialCapital = initCapital
 
         #State
         self.X:pd.DataFrame
@@ -47,6 +48,22 @@ class FinAISMAAlgo:
         self.TestingClassificationReport = None
         self.dfTrainingReport:pd.DataFrame
         self.dfTestingReport:pd.DataFrame
+        self.cumprod1 = None
+        self.cumprod2 = None
+        self.cumprodplot1 = None
+        self.cumprodplot2 = None
+        self.dfFinal = None
+
+        #Summary
+        self.appreciation_pct = 0
+        self.total_trades = 0
+        self.gain_trades = 0
+        self.loss_trades = 0 
+        self.max_profit_trade = 0
+        self.max_loss_trade = 0
+        self.totalTradeProfitLoss = 0
+        self.total_portfolio_value = 0 
+        self.finalProfitLoss = 0
 
         #Actions
         self.Orchestrate()
@@ -63,6 +80,7 @@ class FinAISMAAlgo:
         self.AnalyzeClassificationReports()
         self.AnalyzePredictions()
         self.AnalyzePredictionsPlot()
+        self.ModelPerformanceSummary()
 
 
     def CreateFeatureSets(self):
@@ -88,6 +106,7 @@ class FinAISMAAlgo:
         st.write(self.X.head())
         st.write(self.X.tail())
 
+
     def CreateTargetSets(self):
         st.text_area(f'{self.UIComponentPrefix} ML4 Create the Target Set', "Because we’ll use a supervised learning algorithm, we need to create a target set of the values that we want to predict. In this case, we’ll predict a signal that indicates whether we should buy or sell.For this trading algorithm, we’ll set the signals as follows: If the actual returns are equal to or greater than zero, we’re earning money. Therefore, the signal will indicate that we should buy a position, or go long, on the stock. By contrast, if the actual returns are less than zero, we’re starting to lose money. Therefore, we want to short the stock—that is, sell it with the intention of buying it later, at a lower price, to cover the sale.Let’s return to our original DataFrame and create a new column named “signal”. For now, this column will contain zeros, as the following code shows:")
         st.write('Create a new column in the dfTrades called "signal" setting its value to zero.')
@@ -103,6 +122,8 @@ class FinAISMAAlgo:
         st.text_area(f'{self.UIComponentPrefix} ML6', 'The y target set now includes the target signals that we want to predict. A value of 1 indicates that the algorithm will buy stock. A value of −1 indicates that the algorithm will sell.Now that we have created the features and target sets, it’s time to split the data into training and testing datasets.')
         st.write('Printing y')
         st.write(self.y)
+        #Save it to main object for reuse later
+        self.dfMain = self.dfTrades
 
 
     def GenerateXYTrainAndTestDataSets(self):
@@ -209,9 +230,13 @@ class FinAISMAAlgo:
         st.write('For a different perspective on the model’s performance, we’ll create a plot to visually compare the actual and predicted returns.Let’s start by creating a new DataFrame with the actual and predicted returns, as the following code shows:')
         st.write('Create a predictions DataFrame')
         self.dfPredictions = pd.DataFrame(index=self.X_test.index)
-        self.dfPredictions["predicted_signal"] = self.TestingSignalPredictions
-        self.dfPredictions["actual_returns"] = self.dfTrades["ActualReturns"]
+        lstFuncArgs = [self.BuySignalKey, self.BuySignalVal, self.SellSignalVal]
+        self.TestingSignalPredictionValues = Helper.GetProcessedArrayFromArray(self.TestingSignalPredictions, Helper.CompareAndReturnInt, lstFuncArgs=lstFuncArgs)
+        #self.TestingSignalPredictionValues = [[self.BuySignalVal if i==self.BuySignalKey else self.SellSignalVal for i in row] for row in self.TestingSignalPredictions]
+        self.dfPredictions["predicted_signal"] = self.TestingSignalPredictionValues
+        self.dfPredictions["actual_returns"] = self.dfMain["ActualReturns"]
         self.dfPredictions["trading_algorithm_returns"] = (self.dfPredictions["actual_returns"] * self.dfPredictions["predicted_signal"])
+
         st.write(self.dfPredictions.head())
         st.write(self.dfPredictions.tail())
         st.text_area(f'{self.UIComponentPrefix} ML14', f'Notice that the DataFrame has “predicted_signal”, “actual_returns”, and “trading_algorithm_returns” columns.')
@@ -221,15 +246,39 @@ class FinAISMAAlgo:
         st.write('Let us plot the cumulative returns and compare the actual returns to those that our model predicted by using the historical data.')
         st.write("Calculate and plot the cumulative returns for the `actual_returns` and the `trading_algorithm_returns` ")
         st.write('cumprod -> (1 + dfPredictions[["actual_returns", "trading_algorithm_returns"]]).cumprod()')
-        cumprod= (1 + self.dfPredictions[["actual_returns", "trading_algorithm_returns"]]).cumprod()
-        cumprodplot = cumprod.hvplot.line(
-                    line_color="lightgray",
+        self.dfFinal = (1 + self.dfPredictions[["actual_returns", "trading_algorithm_returns"]]).cumprod()
+        self.cumprod1= (1 + self.dfPredictions[["actual_returns"]]).cumprod()
+        self.cumprodplot1 = self.cumprod1.hvplot.line(
                     width=1000,
                     height=400)
-        st.write(hv.render(cumprodplot, backend='bokeh'))
+        st.write(hv.render(self.cumprodplot1, backend='bokeh'))
+        #st.line_chart(cumprod)
+        #cumprod2 = ((self.dfPredictions + 1).cumprod() - 1)
+        #st.write(hv.render(cumprod2, backend='bokeh'))
+        #st.line_chart(cumprod2)
+        self.cumprod2= (1 + self.dfPredictions[["trading_algorithm_returns"]]).cumprod()
+        self.cumprodplot2 = self.cumprod2.hvplot.line(
+                    width=1000,
+                    height=400)
+        st.write(hv.render(self.cumprodplot2, backend='bokeh'))
         st.text_area(f'{self.UIComponentPrefix} ML15', 'Notice that our SVM model performed well from the beginning of the period until early in 2020. That’s when the actual and predicted returns start to greatly differ. To truly find out how well this model works, however, we need to fit it to different sets of pricing data, have it make predictions, backtest it, and then evaluate it against the actual performance of the asset with that trading strategy. backtesting the SMA long-short trading strategy using the SVM model provides an interesting example of the predictive power of machine learning. The SVM model made trading decisions that strongly outperformed the actual returns in some market scenarios, as illustrated by the steep rise in the trading_algorithm_returns plot line. However, sometimes the SVM model also made decisions that underperformed relative to the actual returns, as illustrated by the steep decline in the trading_algorithm_returns plot line. Overall, the SVM models trading decisions, though more volatile, produced a higher cumulative return value than the original trading strategys actual returns.')
+
+
+    def ModelPerformanceSummary(self):
+        # Use the analyzed and backtested data to summarize the results
+        st.write(f'#Analysis Summary')
+        self.ending_value = self.dfFinal.iat[-1, 1] 
+        self.appreciation_pct = round(self.ending_value * 100, 2)
+        self.final_investment = self.initialCapital * self.ending_value
+        self.finalProfitLoss = self.final_investment - self.initialCapital
+        st.write(f'Analysis Type: Simple Moving Average Crossover({self.short_window}, {self.long_window}) with Machine Learning {self.modelType}') 
+        st.write(f'Initial Capital: ${round(self.initialCapital,2)}')
+        st.write(f'Total Trade/Profit Loss: ${round(self.finalProfitLoss,2)} ')
+        st.write(f'Final Investment Value : ${round(self.final_investment, 2)}')
 
 
     def CreateModel(self):
         if(self.modelType == "SVM"):
             self.model = svm.SVC()
+        elif(self.modelType == "LogisticRegression"):
+            self.model = linear_model.LogisticRegression()
