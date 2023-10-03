@@ -47,8 +47,7 @@ def GetYFinanceData2(lstTickers):
     return df_Data
 
 
-def GetYFinanceData(lstTickers, timeperiod):
-    DataFrame: df_Data
+def GetYFinanceData(lstTickers, timeperiod)->pd.DataFrame:
     #data = yf.download(tickers[0], start="2017-01-01", end="2017-04-30")
 
     df_Data = yf.download(  # or pdr.get_data_yahoo(...

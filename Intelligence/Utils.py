@@ -31,12 +31,15 @@ def GetCSVDataFromResources(fileName, indexCol) -> pd.DataFrame:
     return dfData
 
 
-def GetLocalTickerData(ticker):
+def GetLocalTickerData(ticker, tickerdatapath=None):
     dfTickerData = None
     try:
-        absdir = Path(__file__).parent.absolute()
         csvreadname = ticker + '.csv'
-        csvreadpath = Path(f'{absdir}/TickerData/{csvreadname}')
+        if(tickerdatapath is None):
+            absdir = Path(__file__).parent.parent.absolute()
+            csvreadpath = Path(f'{absdir}/TickerData/{csvreadname}')
+        else:
+            csvreadpath = Path(f'{tickerdatapath}/{csvreadname}')
         dfTickerData = pd.read_csv(Path(csvreadpath), index_col='Date', parse_dates=True, infer_datetime_format=True)
     except Exception as ex:
         print(f'Error in getting ticker close data for ticker {ticker}. Error is {ex}')      

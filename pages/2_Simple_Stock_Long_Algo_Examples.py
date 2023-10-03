@@ -32,7 +32,7 @@ def Init():
 
     if(dfTicker is None):
         print(f'Loading ticker data for ticker {ticker}')
-        dfTicker = cloud_data_collector.GetTickersData(lstTickers, '1y')  
+        dfTicker = cloud_data_collector.GetTickersData(lstTickers, '2y')  
         if(dfTicker is not None):
             Utils.SaveTickerData(ticker, dfTicker)
 
