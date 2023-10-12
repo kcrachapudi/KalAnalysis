@@ -5,6 +5,18 @@ import numpy as np
 import datetime
 import traceback
 import numbers
+from decimal import Decimal
+
+def SetDataFrameColsTo2Decimals(dfData:pd.DataFrame, lstcols:list):
+    for col in lstcols:
+        dfData[col] = dfData[col].map('{:,.2f}'.format)
+    return dfData
+
+
+def SetDataFrameColsToCurrency(dfData:pd.DataFrame, lstcols:list):
+    for col in lstcols:
+        dfData[col] = dfData[col].map('${:,.2f}'.format)
+    return dfData
 
 
 def GetNumericColumnMax(dfData, colName, roundNum=-1):

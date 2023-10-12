@@ -31,15 +31,15 @@ def GetCSVDataFromResources(fileName, indexCol) -> pd.DataFrame:
     return dfData
 
 
-def GetLocalTickerData(ticker, tickerdatapath=None):
-    dfTickerData = None
+def GetLocalTickerData(ticker, location)->pd.DataFrame:
+    dfTickerData:pd.DataFrame
     try:
         csvreadname = ticker + '.csv'
-        if(tickerdatapath is None):
+        if(location is None):
             absdir = Path(__file__).parent.parent.absolute()
             csvreadpath = Path(f'{absdir}/TickerData/{csvreadname}')
         else:
-            csvreadpath = Path(f'{tickerdatapath}/{csvreadname}')
+            csvreadpath = Path(f'{location}/{csvreadname}')
         dfTickerData = pd.read_csv(Path(csvreadpath), index_col='Date', parse_dates=True, infer_datetime_format=True)
     except Exception as ex:
         print(f'Error in getting ticker close data for ticker {ticker}. Error is {ex}')      
@@ -64,10 +64,13 @@ def save_download_details():
     dfNow.to_csv(csvwritepath) 
 
 
-def SaveTickerData(ticker, dfTicker):
-    absdir = Path(__file__).parent.absolute()
+def SaveTickerData(ticker, dfTicker, location):
     csvwritename = ticker +'.csv'
-    csvwritepath = Path(f'{absdir}/TickerData/{csvwritename}')
+    if(location is None):
+        absdir = Path(__file__).parent.parent.absolute()
+        csvwritepath = Path(f'{absdir}/TickerData/{csvwritename}')
+    else:
+        csvwritepath = Path(f'{location}/{csvwritename}')
     dfTicker.to_csv(csvwritepath) 
 
 
