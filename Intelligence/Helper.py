@@ -52,3 +52,14 @@ def CompareAndReturnInt(originalVal:str, compareVal:str, matchReturnVal:int, els
     else:
         intVal = elseReturnVal
     return intVal
+
+
+def CalcTrend(diff):
+    result:int = 0
+    if(diff>0):
+        result = 1
+    elif(diff<0):
+        result = -1
+    else:
+        result = 0
+    return result

@@ -19,6 +19,7 @@ def get_download_details():
         print(f'Error in getting Download date {ex}')            
     return download_date
 
+
 def GetCSVDataFromResources(fileName, indexCol) -> pd.DataFrame:
     dfData:pd.DataFrame = pd.DataFrame()
     try:
@@ -28,6 +29,16 @@ def GetCSVDataFromResources(fileName, indexCol) -> pd.DataFrame:
     except Exception as ex:
         print(f'Error in getting csv data for {fileName} . Error is {ex}')      
         traceback.print_exc()      
+    return dfData
+
+
+def GetLocalCSVData(fileName:str, location:str)->pd.DataFrame:
+    dfData:pd.DataFrame
+    try:
+        csvpath = Path(f'{location}/{fileName}')
+        dfData = pd.read_csv(Path(csvpath))
+    except Exception as ex:
+        print(f'Error in getting data {ex}')      
     return dfData
 
 
