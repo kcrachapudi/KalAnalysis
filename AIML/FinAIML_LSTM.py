@@ -1,0 +1,185 @@
+from os import close
+import streamlit as st
+from fileinput import filename
+import pandas as pd
+from Intelligence import BackTestFinal, BackTestInitial, Utils, DataPreparer, Helper
+import holoviews as hv
+import numpy as np
+from pandas.tseries.offsets import DateOffset
+from sklearn.preprocessing import StandardScaler, MinMaxScaler
+from sklearn import svm, linear_model
+from sklearn.metrics import classification_report
+from sklearn.model_selection import TimeSeriesSplit
+from enum import StrEnum
+import matplotlib. pyplot as plt
+#%matplotlib inline
+
+from keras.layers import LSTM, Dense, Dropout
+from sklearn.model_selection import TimeSeriesSplit
+from sklearn.metrics import mean_squared_error, r2_score
+import matplotlib. dates as mandates
+from sklearn import linear_model
+from keras.models import Sequential
+import keras.backend as K
+from keras.callbacks import EarlyStopping
+from keras.optimizers import Adam
+from keras.models import load_model
+from keras.utils import plot_model
+
+
+class FinAIML_LSTM:
+    
+    def __init__(self, dfData, featureColumns, targetColName, predictionColName, model_type, train_data_percent, validation_data_percent, test_data_percent, initCapital):
+        #Gather Parameters    
+        self.dfData:pd.DataFrame = dfData
+        self.FeatureCols = featureColumns
+        self.TargetCol = targetColName
+        self.PredictedCol = predictionColName
+        self.modelType = model_type 
+        self.trainDataPercent = train_data_percent
+        self.validationDataPercent = validation_data_percent
+        self.testDataPercent = test_data_percent
+        self.initialCapital = initCapital
+
+        #State
+        self.X:pd.DataFrame
+        self.y:pd.DataFrame
+        self.training_begin = None
+        self.training_end = None
+        
+        self.X_train = None
+        self.y_train = None
+        self.X_validation = None
+        self.y_validation = None
+        self.X_test = None
+        self.y_test = None
+        
+        self.scaler = None
+        self.X_scaler = None
+        self.X_scaled = pd.DataFrame
+        self.X_train_scaled = None
+        self.X_test_scaled = None
+        self.X_special_train = None
+        self.X_special_test = None
+        
+        self.trainX = None
+        self.testX = None
+        
+        self.model = None
+        self.dfPredictions:pd.DataFrame
+        self.TestingSignalPredictions = None
+        self.TrainingClassificationReport = None
+        self.TestingClassificationReport = None
+        self.dfTrainingReport:pd.DataFrame
+        self.dfTestingReport:pd.DataFrame
+        
+        self.cumprod1 = None
+        self.cumprod2 = None
+        self.cumprodplot1 = None
+        self.cumprodplot2 = None
+        self.dfFinal = None
+
+        #Summary
+        self.appreciation_pct = 0
+        self.total_trades = 0
+        self.gain_trades = 0
+        self.loss_trades = 0 
+        self.max_profit_trade = 0
+        self.max_loss_trade = 0
+        self.totalTradeProfitLoss = 0
+        self.total_portfolio_value = 0 
+        self.finalProfitLoss = 0
+
+
+    def Orchestrate(self):
+        self.CreateFeatureSets()
+        self.ScaleFeatureSets()
+        self.CreateTargetSets()
+        self.GenerateXTrainAndTestDataSets()
+        self.GenerateYTrainAndTestDataSets()
+        self.ExecuteSpecialModelRequirements()
+        self.PrepareModel()
+
+        self.FitModelToTrain()
+        self.PredictTrain()
+        self.AnalyzePredictions()
+        #self.AnalyzePredictionsPlot()
+        #self.ModelPerformanceSummary()
+
+
+    def CreateFeatureSets(self):
+        self.X = self.dfData[self.FeatureCols].copy()
+        print(self.X.head())
+        print(self.X.tail())
+
+
+    def ScaleFeatureSets(self):
+        scaler = MinMaxScaler()
+        self.X_scaled = scaler.fit_transform(self.X)
+        self.X_scaled = pd.DataFrame(columns=self.FeatureCols, data=self.X_scaled, index=self.X.index)
+
+
+    def CreateTargetSets(self):
+        self.y = pd.DataFrame(self.dfData[self.TargetCol])
+
+
+    def GenerateXTrainAndTestDataSets(self):
+        self.training_begin = self.X.index.min()    
+        timesplit= TimeSeriesSplit(n_splits=self.trainDataPercent)
+        for train_index, test_index in timesplit.split(self.X_scaled):
+            self.X_train, self.X_test = self.X_scaled[:len(train_index)], self.X_scaled[len(train_index): (len(train_index)+len(test_index))]
+    
+    
+    def GenerateYTrainAndTestDataSets(self):
+        self.training_begin = self.y.index.min()    
+        timesplit= TimeSeriesSplit(n_splits=self.trainDataPercent)
+        for train_index, test_index in timesplit.split(self.y):           
+            self.y_train, self.y_test = self.y[:len(train_index)].values.ravel(), self.y[len(train_index): (len(train_index)+len(test_index))].values.ravel()
+
+
+    def ExecuteSpecialModelRequirements(self):
+        #Process the data for LSTM
+        self.trainX = np.array(self.X_train)
+        self.testX = np.array(self.X_test)
+        self.X_special_train = self.trainX.reshape(self.X_train.shape[0], 1, self.X_train.shape[1])
+        self.X_special_test = self.testX.reshape(self.X_test.shape[0], 1, self.X_test.shape[1])
+    
+    
+    def PrepareModel(self):
+        #Building the LSTM Model
+        activation = 'linear'       #'softmax'  # 'relu', 'linear'
+        self.model = Sequential()
+        self.model.add(LSTM(128, input_shape=(1, self.trainX.shape[1]), activation=activation, return_sequences=False))
+        self.model.add(Dense(1))
+        adamOpti = Adam(learning_rate = 0.00000001)
+        self.model.compile(loss='mean_squared_error', optimizer=adamOpti)
+        plot_model(self.model, show_shapes=True, show_layer_names=True)
+
+    
+    def FitModelToTrain(self):
+        history = self.model.fit(self.X_special_train, self.y_train, epochs=100, batch_size=8, verbose=1, shuffle=False)
+
+
+    def PredictTrain(self):
+        self.y_pred = self.model.predict(self.X_special_test)
+
+    
+    def AnalyzePredictions(self):
+        print(f'Printing Y Test {self.y_test}')
+        print(f'Printing Y Pred {self.y_pred}')
+        plt.plot(self.y_test, label='True Value')
+        plt.plot(self.y_pred, label='LSTM Value')
+        plt.title('Prediction by LSTM')
+        plt.xlabel('Time Scale')
+        plt.ylabel('Scaled USD')
+        plt.legend()
+        plt.show()
+
+
+    def CreateModel(self):
+        if(self.modelType == "SVM"):
+            self.model = svm.SVC()
+        elif(self.modelType == "LinearRegression"):
+            self.model = linear_model.LinearRegression()
+        elif(self.modelType == "LogisticRegression"):
+            self.model = linear_model.LogisticRegression()
