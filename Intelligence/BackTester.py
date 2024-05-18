@@ -6,11 +6,10 @@ from path import Path
 from sklearn.cluster import KMeans
 from sklearn.decomposition import PCA
 from sklearn.preprocessing import StandardScaler
-import Utils
+from . import Utils, DataFramer
 from st_aggrid import GridOptionsBuilder, AgGrid, GridUpdateMode, DataReturnMode
 import holoviews as hv
 import numpy as np
-import DataFramer
 import Intelligence.Aggridder as Aggridder
 
 def BackTesterInit(dfData, initialCapital, shareSize):
