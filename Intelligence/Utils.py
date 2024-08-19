@@ -43,7 +43,7 @@ def GetLocalCSVData(fileName:str, location:str)->pd.DataFrame:
 
 
 def GetLocalTickerData(ticker, location=None)->pd.DataFrame:
-    dfTickerData:pd.DataFrame
+    dfTickerData = pd.DataFrame()
     try:
         csvreadname = ticker + '.csv'
         if(location is None):

@@ -35,13 +35,13 @@ import datetime
 
 class FinAIML_LinReg:
     
-    def __init__(self, dfData, featureColumns, targetColName, predictionColName, model_type, train_data_percent, validation_data_percent, test_data_percent, initCapital):
+    def __init__(self, dfData, featureColumns, targetColName, predictionColName, train_data_percent, validation_data_percent, test_data_percent, initCapital):
         #Gather Parameters    
         self.dfData:pd.DataFrame = dfData
         self.FeatureCols = featureColumns
         self.TargetCol = targetColName
         self.PredictedCol = predictionColName
-        self.modelType = model_type 
+
         self.trainDataPercent = train_data_percent
         self.validationDataPercent = validation_data_percent
         self.testDataPercent = test_data_percent
