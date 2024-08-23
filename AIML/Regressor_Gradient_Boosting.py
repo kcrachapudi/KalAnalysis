@@ -23,8 +23,7 @@ from sklearn.metrics import mean_squared_error, r2_score
 import matplotlib. dates as mandates
 from sklearn import linear_model
 
-from sklearn.linear_model import LinearRegression
-from sklearn.neighbors import KNeighborsRegressor
+from sklearn.ensemble import GradientBoostingRegressor
 from sklearn import preprocessing
 from sklearn.linear_model import Ridge
 from sklearn.preprocessing import PolynomialFeatures
@@ -33,7 +32,7 @@ from sklearn.pipeline import make_pipeline
 import datetime
 
 
-class FinAIML_LinReg:
+class Regressor_GradientBoosting:
     
     def __init__(self, dfData, featureColumns, targetColName, predictionColName, train_data_percent, validation_data_percent, test_data_percent, initCapital):
         #Gather Parameters    
@@ -116,87 +115,6 @@ class FinAIML_LinReg:
         #self.ModelPerformanceSummary()
 
     
-    def Main(self):
-        # We want to separate percent of the data to forecast
-        forecast_out = int(ceil(self.testDataPercent * len(self.dfData)))
-        self.dfData['Target'] = self.dfData[self.TargetCol].shift(-forecast_out)
-        X = np.array(self.dfData.drop(['Target'], 1))
-        # Scale the X so that everyone can have the same distribution for linear regression
-        X = preprocessing.scale(X)
-        # Finally We want to find Data Series of late X and early X (train) for model generation and evaluation
-        X_lately = X[-forecast_out:]
-        X = X[:-forecast_out]
-        # Separate label and identify it as y
-        y = np.array(self.dfData['Target'])
-        y = y[:-forecast_out]
-        print('Dimension of X',X.shape)
-        print('Dimension of y',y.shape)
-        
-        # Separation of training and testing of model by cross validation train test split
-        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=self.testDataPercent)
-       
-        xtrainnan, xtrainnonnan = Numpyer.CountNumpyNanNonNan(X_train)
-        print(f'X_train contains {xtrainnan} Nan {xtrainnonnan} Non-Nan ')
-        xtestnan, xtestnonnan = Numpyer.CountNumpyNanNonNan(X_test)
-        print(f'X_test contains {xtestnan} Nan {xtestnonnan} Non-Nan ')
-        ytrainnan, ytrainnonnan = Numpyer.CountNumpyNanNonNan(y_train)
-        print(f'y_train contains {ytrainnan} Nan {ytrainnonnan} Non-Nan ')
-        ytestnan, ytestnonnan = Numpyer.CountNumpyNanNonNan(y_test)
-        print(f'y_test contains {ytestnan} Nan {ytestnonnan} Non-Nan ')
-        
-        # Linear regression
-        clfreg = LinearRegression(n_jobs=-1)
-        clfreg.fit(X_train, y_train)
-
-        # Quadratic Regression 2
-        clfpoly2 = make_pipeline(PolynomialFeatures(2), Ridge())
-        clfpoly2.fit(X_train, y_train)
-
-        # Quadratic Regression 3
-        clfpoly3 = make_pipeline(PolynomialFeatures(3), Ridge())
-        clfpoly3.fit(X_train, y_train)
-            
-        # KNN Regression
-        clfknn = KNeighborsRegressor(n_neighbors=2)
-        clfknn.fit(X_train, y_train)
-
-        confidencereg = clfreg.score(X_test, y_test)
-        confidencepoly2 = clfpoly2.score(X_test,y_test)
-        confidencepoly3 = clfpoly3.score(X_test,y_test)
-        confidenceknn = clfknn.score(X_test, y_test)
-
-        print("The linear regression confidence is ",confidencereg)
-        print("The quadratic regression 2 confidence is ",confidencepoly2)
-        print("The quadratic regression 3 confidence is ",confidencepoly3)
-        print("The knn regression confidence is ",confidenceknn)
-
-        # Printing the forecast
-        forecastreg = clfreg.predict(X_lately)
-        self.dfData['Forecastreg'] = np.nan
-        print(forecastreg, confidencereg, forecast_out)    
-        
-        forecastpoly2 = clfpoly2.predict(X_lately)
-        self.dfData['Forecastpoly2'] = np.nan
-        print(forecastpoly2, confidencepoly2, forecast_out)    
-
-        forecastpoly3 = clfpoly3.predict(X_lately)
-        self.dfData['Forecastpoly3'] = np.nan
-        print(forecastpoly3, confidencepoly3, forecast_out)    
-
-        forecastknn = clfknn.predict(X_lately)
-        self.dfData['Forecastknn'] = np.nan
-        print(forecastknn, confidenceknn, forecast_out)    
-
-        print(self.dfData.head())
-        print(self.dfData.tail())
-
-        # Plotting the Predictions
-        self.ChartPredictions(forecastreg, 'Forecastreg')
-        self.ChartPredictions(forecastpoly2, 'Forecastpoly2')
-        self.ChartPredictions(forecastpoly3, 'Forecastpoly3')
-        self.ChartPredictions(forecastknn, 'Forecastknn')
-        
-
     def Main2(self, dfMain:pd.DataFrame):
         dfOrig = dfMain.copy()
         dfOrig.drop(self.TargetCol, axis=1, inplace=True)
@@ -219,91 +137,17 @@ class FinAIML_LinReg:
 
         # finally, split into train-test
         X_train, X_test, y_train, y_test = train_test_split(dfOrig, dfTarget, train_size = self.trainDataPercent)
-
-        model = self.CreateModel('LinearRegression')
+        model = GradientBoostingRegressor(random_state=0)
         model.fit(X_train, y_train)
-
+        modelscore = model.score(X_train, y_train)
+        print(f'Model Score is {modelscore}')
         y_pred = model.predict(X_test)
         y_test[self.PredictedCol] = y_pred
 
-        #dfFinal = pd.merge(dfOrig, y_test[[self.PredictedCol]], how = 'left', left_index = True, right_index = True)
         dfFinal = pd.merge(dfOrig, y_test, how = 'left', left_index = True, right_index = True)
         print(dfFinal.head())
         print(dfFinal.tail())
-        
-        return
     
-        # Linear regression
-        clfreg = LinearRegression(n_jobs=-1)
-        clfreg.fit(X_train, y_train)
-
-        # Quadratic Regression 2
-        clfpoly2 = make_pipeline(PolynomialFeatures(2), Ridge())
-        clfpoly2.fit(X_train, y_train)
-
-        # Quadratic Regression 3
-        clfpoly3 = make_pipeline(PolynomialFeatures(3), Ridge())
-        clfpoly3.fit(X_train, y_train)
-            
-        # KNN Regression
-        clfknn = KNeighborsRegressor(n_neighbors=2)
-        clfknn.fit(X_train, y_train)
-
-        confidencereg = clfreg.score(X_test, y_test)
-        confidencepoly2 = clfpoly2.score(X_test,y_test)
-        confidencepoly3 = clfpoly3.score(X_test,y_test)
-        confidenceknn = clfknn.score(X_test, y_test)
-
-        print("The linear regression confidence is ",confidencereg)
-        print("The quadratic regression 2 confidence is ",confidencepoly2)
-        print("The quadratic regression 3 confidence is ",confidencepoly3)
-        print("The knn regression confidence is ",confidenceknn)
-
-        # Printing the forecast
-        forecastreg = clfreg.predict(X_lately)
-        self.dfData['Forecastreg'] = np.nan
-        print(forecastreg, confidencereg, forecast_out)    
-        
-        forecastpoly2 = clfpoly2.predict(X_lately)
-        self.dfData['Forecastpoly2'] = np.nan
-        print(forecastpoly2, confidencepoly2, forecast_out)    
-
-        forecastpoly3 = clfpoly3.predict(X_lately)
-        self.dfData['Forecastpoly3'] = np.nan
-        print(forecastpoly3, confidencepoly3, forecast_out)    
-
-        forecastknn = clfknn.predict(X_lately)
-        self.dfData['Forecastknn'] = np.nan
-        print(forecastknn, confidenceknn, forecast_out)    
-
-        print(self.dfData.head())
-        print(self.dfData.tail())
-
-        # Plotting the Predictions
-        self.ChartPredictions(forecastreg, 'Forecastreg')
-        self.ChartPredictions(forecastpoly2, 'Forecastpoly2')
-        self.ChartPredictions(forecastpoly3, 'Forecastpoly3')
-        self.ChartPredictions(forecastknn, 'Forecastknn')
-
-
-    def ChartPredictions(self, forecast_set, forecasttarget):
-        #Plot the Predictions
-        last_date = self.dfData.iloc[-1].name
-        last_unix = last_date
-        next_unix = last_unix + datetime.timedelta(days=1)
-
-        for i in forecast_set:
-            next_date = next_unix
-            next_unix += datetime.timedelta(days=1)
-            self.dfData.loc[next_date] = [np.nan for _ in range(len(self.dfData.columns)-1)]+[i]
-        
-        self.dfData[self.TargetCol].tail(1000).plot()
-        self.dfData[forecasttarget].tail(1000).plot()
-        plt.legend(loc=4)
-        plt.xlabel('Date')
-        plt.ylabel('Price')
-        plt.show()
-        
         
     def CreateFeatureSets(self):
             self.X = self.dfData[self.FeatureCols].copy()

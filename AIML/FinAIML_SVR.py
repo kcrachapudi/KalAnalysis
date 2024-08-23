@@ -100,6 +100,8 @@ class FinAIML_SVR:
     def Orchestrate(self):
         #self.Main()
         self.Main2(self.dfData)
+        init_close_null_count = self.dfData['Close'].isnull().sum()
+        print('Initial Number of null values:', init_close_null_count)
         pass
        
 
