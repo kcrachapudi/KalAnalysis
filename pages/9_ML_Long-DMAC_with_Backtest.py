@@ -3,7 +3,7 @@ import imp
 import streamlit as st
 from fileinput import filename
 import pandas as pd
-from Intelligence import BackTestFinal, BackTestInitial, Utils, DataPreparer, cloud_data_collector
+from Intelligence import BackTestFinal, BackTestInitial, DataPreparer, cloud_data_collector
 import holoviews as hv
 
 import numpy as np
@@ -13,6 +13,7 @@ from sklearn.preprocessing import StandardScaler
 from sklearn import svm
 from sklearn.metrics import classification_report
 from AIML import Fin_AI_SMA_Algo
+from Utils import Utils
 
 st.write(
 """

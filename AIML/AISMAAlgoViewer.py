@@ -2,7 +2,7 @@ from os import close
 import streamlit as st
 from fileinput import filename
 import pandas as pd
-from Intelligence import BackTestFinal, BackTestInitial, Utils, DataPreparer, Helper
+from Intelligence import BackTestFinal, BackTestInitial, DataPreparer
 import holoviews as hv
 import numpy as np
 from pandas.tseries.offsets import DateOffset
@@ -11,6 +11,7 @@ from sklearn import svm
 from sklearn.metrics import classification_report
 from enum import StrEnum
 from Fin_AI_SMA_Algo import FinAISMAAlgo
+from Utils import Helper, Utils
 
 
 def View(algoml:FinAISMAAlgo, viewBasic=True, viewDetailed=False):

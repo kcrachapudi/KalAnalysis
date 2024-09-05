@@ -2,10 +2,11 @@
 import streamlit as st
 from fileinput import filename
 import pandas as pd
-from Intelligence import BackTestFinal, BackTestInitial, Utils
+from Intelligence import BackTestFinal, BackTestInitial
 import holoviews as hv
 import numpy as np
 import Intelligence.Aggridder as Aggridder
+from Utils import Utils
 
 dfSignals:pd.DataFrame = Utils.GetCSVDataFromResources("backtest-metrics.csv", "date")
 

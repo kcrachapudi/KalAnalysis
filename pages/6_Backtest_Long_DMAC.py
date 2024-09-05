@@ -6,11 +6,12 @@ from path import Path
 from sklearn.cluster import KMeans
 from sklearn.decomposition import PCA
 from sklearn.preprocessing import StandardScaler
-from Intelligence import Utils, DataFramer, BackTester
+from Intelligence import DataFramer, BackTester
 from st_aggrid import GridOptionsBuilder, AgGrid, GridUpdateMode, DataReturnMode
 import holoviews as hv
 import numpy as np
 import Intelligence.Aggridder as Aggridder
+from Utils import Utils
 
 with st.spinner('Retrieving and loading Stock Data...'):
     st.write("CSV Data loaded into DataFrame")

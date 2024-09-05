@@ -2,7 +2,7 @@ from os import close
 import streamlit as st
 from fileinput import filename
 import pandas as pd
-from Intelligence import BackTestFinal, BackTestInitial, Utils, DataPreparer, Helper, Numpyer
+from Intelligence import BackTestFinal, BackTestInitial, DataPreparer, Numpyer
 import holoviews as hv
 import numpy as np
 from pandas.tseries.offsets import DateOffset
@@ -30,6 +30,8 @@ from sklearn.preprocessing import PolynomialFeatures
 from sklearn.pipeline import make_pipeline
 
 import datetime
+
+from Utils import Helper, Utils
 
 
 class Regressor_GradientBoosting:

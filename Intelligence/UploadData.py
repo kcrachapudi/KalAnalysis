@@ -21,7 +21,7 @@ import plotly.express as px
 from sklearn.preprocessing import LabelEncoder
 import seaborn as sns
 import base64
-from Utils.CSVReader import ETLCSVtoDataFrame
+from Utils.CSVHelper import ETLCSVtoDataFrame
 from Utils.Weber import download_link
 
 

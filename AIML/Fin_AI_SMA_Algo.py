@@ -2,7 +2,7 @@ from os import close
 import streamlit as st
 from fileinput import filename
 import pandas as pd
-from Intelligence import BackTestFinal, BackTestInitial, Utils, DataPreparer, Helper
+from Intelligence import BackTestFinal, BackTestInitial, DataPreparer
 import holoviews as hv
 import numpy as np
 from pandas.tseries.offsets import DateOffset
@@ -10,6 +10,8 @@ from sklearn.preprocessing import StandardScaler
 from sklearn import svm, linear_model
 from sklearn.metrics import classification_report
 from enum import StrEnum
+
+from Utils import Helper, Utils
 
 class FinAISMAAlgo:
     

@@ -2,7 +2,7 @@ from os import close
 import streamlit as st
 from fileinput import filename
 import pandas as pd
-from Intelligence import BackTestFinal, BackTestInitial, Utils, DataPreparer, Helper
+from Intelligence import BackTestFinal, BackTestInitial, DataPreparer
 import holoviews as hv
 import numpy as np
 from pandas.tseries.offsets import DateOffset
@@ -25,6 +25,8 @@ from keras.callbacks import EarlyStopping
 from keras.optimizers import Adam
 from keras.models import load_model
 from keras.utils import plot_model
+
+from Utils import Helper, Utils
 
 
 class FinAIML_LSTM:

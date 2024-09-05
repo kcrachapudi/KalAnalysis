@@ -20,27 +20,6 @@ def get_download_details():
     return download_date
 
 
-def GetCSVDataFromResources(fileName, indexCol) -> pd.DataFrame:
-    dfData:pd.DataFrame = pd.DataFrame()
-    try:
-        absdir = Path(__file__).parent.absolute()
-        csvreadpath = Path(f'{absdir}/../Resources/{fileName}')
-        dfData = pd.read_csv(Path(csvreadpath), index_col=indexCol, parse_dates=True, infer_datetime_format=True)
-    except Exception as ex:
-        print(f'Error in getting csv data for {fileName} . Error is {ex}')      
-        traceback.print_exc()      
-    return dfData
-
-
-def GetLocalCSVData(fileName:str, location:str)->pd.DataFrame:
-    dfData:pd.DataFrame
-    try:
-        csvpath = Path(f'{location}/{fileName}')
-        dfData = pd.read_csv(Path(csvpath))
-    except Exception as ex:
-        print(f'Error in getting data {ex}')      
-    return dfData
-
 
 def GetLocalTickerData(ticker, location=None)->pd.DataFrame:
     dfTickerData = pd.DataFrame()
@@ -163,15 +142,7 @@ def generate_ticker_sharpe_ratio(ticker, numYears):
     return annual_average_returns[0], annual_standard_deviation[0], sharpe_ratios[0]
 
 
-def GetStringFromList(lstStrings):
-    strFinal = ""
-    if(lstStrings is not None and len(lstStrings)>0):
-        for str in lstStrings:
-            strFinal += str + ","
-        strFinal.removesuffix(",")
-    return strFinal
 
-def ConvertFloatToNumString(num):
     ret = 0.0
     try:
         ret = f'{round(num*100,2)}%'

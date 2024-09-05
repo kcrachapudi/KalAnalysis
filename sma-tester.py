@@ -1,6 +1,6 @@
 import pandas as pd
 from pathlib import Path
-from Intelligence import Utils
+from Utils import Utils
 from AIML.AIML_sma import SMAML
 
 import warnings

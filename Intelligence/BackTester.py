@@ -6,7 +6,9 @@ from path import Path
 from sklearn.cluster import KMeans
 from sklearn.decomposition import PCA
 from sklearn.preprocessing import StandardScaler
-from . import Utils, DataFramer
+
+from ..Utils import Utils
+from . import DataFramer
 from st_aggrid import GridOptionsBuilder, AgGrid, GridUpdateMode, DataReturnMode
 import holoviews as hv
 import numpy as np

@@ -6,11 +6,12 @@ from path import Path
 from sklearn.cluster import KMeans
 from sklearn.decomposition import PCA
 from sklearn.preprocessing import StandardScaler
-from Intelligence import BackTestFinal, Utils
+from Intelligence import BackTestFinal
 from st_aggrid import GridOptionsBuilder, AgGrid, GridUpdateMode, DataReturnMode
 import holoviews as hv
 import numpy as np
 import Intelligence.Aggridder as Aggridder
+from Utils import Utils
 
 def Evaluate(dfSignals) -> pd.DataFrame:
     st.write(' Create a list for the column name')
