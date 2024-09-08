@@ -43,7 +43,7 @@
             "request": "launch",
             "console": "integratedTerminal",
             "justMyCode": true,
-            "program": "C:\\Projects\\KalAnalysis\\KalEnv\\Scripts\\streamlit.exe",
+            "program": "C:\\Projects\\KalAnalysis\\.venv\\Scripts\\streamlit.exe",
             "args": [
                 //"streamlit",
                 "run",
