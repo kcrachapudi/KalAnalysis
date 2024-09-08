@@ -1,12 +1,12 @@
 from dowhy.causal_estimators import CausalEstimator
 from dowhy.causal_refuters.data_subset_refuter import DataSubsetRefuter
-from .upload_data_page import upload_data
+from .UploadData import upload_data
 from .FeatureEngineering import feature_engineering, display_data_preview, display_handle_missing_values, display_process_currency_percentage
 from .FeatureEngineering import display_drop_columns, display_data_transformation, display_encode_categorical, display_time_series_features, display_convert_to_datetime
 from .ExploreData import explore_data, display_boxplot, display_binary_distribution, feature_comparison_graph_page
-from .regression import evaluate_model_page, display_model_performance_comparison, prepare_data, create_models, fit_models, evaluate_models, plot_model_performance
-from .regression import display_select_target_features_and_train, display_feature_importance, display_prediction_vs_actual, display_residuals_plot
-from .regression import display_correlation_heatmap, evaluate_model_page
+from .Regression import evaluate_model_page, display_model_performance_comparison, prepare_data, create_models, fit_models, evaluate_models, plot_model_performance
+from .Regression import display_select_target_features_and_train, display_feature_importance, display_prediction_vs_actual, display_residuals_plot
+from .Regression import display_correlation_heatmap, evaluate_model_page
 from .AdvanceDataAnalysis import advanced_data_analysis, perform_classification, perform_clustering, perform_dimensionality_reduction
 from .TimeSeriesAnalysis import time_series_analysis, visualize_time_series_data,display_acf_pacf, fit_arima_model
 import streamlit as st
