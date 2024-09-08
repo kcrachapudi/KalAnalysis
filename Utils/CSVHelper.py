@@ -36,6 +36,7 @@ def ETLCSVtoDataFrame(file, filedatatype):
         dfData = pd.read_csv(iodata)   
     return dfData
 
+
 def GetCSVDataFromResources(fileName, indexCol) -> pd.DataFrame:
     dfData:pd.DataFrame = pd.DataFrame()
     try:
@@ -44,7 +45,6 @@ def GetCSVDataFromResources(fileName, indexCol) -> pd.DataFrame:
         dfData = pd.read_csv(Path(csvreadpath), index_col=indexCol, parse_dates=True, infer_datetime_format=True)
     except Exception as ex:
         print(f'Error in getting csv data for {fileName} . Error is {ex}')      
-        traceback.print_exc()      
     return dfData
 
 
