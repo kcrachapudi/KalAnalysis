@@ -3,3 +3,6 @@ base="light"
 primaryColor = "#40E0D0"
 secondaryBackgroundColor = "#40E0D0"
 font = "sans serif"
+
+[server]
+enableXsrfProtection = false
