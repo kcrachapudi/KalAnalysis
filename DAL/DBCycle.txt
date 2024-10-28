@@ -1,0 +1,4 @@
+1. Update WinPy MBA Dev DB with DB Structure (Add Tables or Add Columns) as needed
+2. Update MBA Prod DB with Weekly(Friday) Data Pull from Google spreadsheets
+3. Take Monthly Backups of MBA PROD DB and Store in GitHub or GDrive
+4. Refresh Prod DB Data into Dev DB

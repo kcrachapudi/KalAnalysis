@@ -1,0 +1,265 @@
+from os import environ
+from sqlalchemy.orm import joinedload
+from sqlalchemy import extract, distinct, asc, joinedload, Table, MetaData
+from sqlalchemy.ext.declarative import declarative_base
+import pandas as pd
+
+
+class DBPlayer:
+    dbEngine = None
+    dbMetaData = None
+    
+    def __init__(self, dbengine):
+        self.dbEngine = dbengine
+        #load the metadata using the engine as the bind parameter
+        self.dbMetaData = MetaData(bind=self.dbEngine)
+
+
+    def TableSelect(self, tableName:str)->pd.DataFrame:
+        #decoratedTableName = self.DecorateTableName(tableName)
+        #sql = f'SELECT * FROM {decoratedTableName}'
+        #return pd.read_sql(sql, con=self.DBCon)
+        table = Table(tableName, self.dbMetaData, autoload = True, autoload_with=self.dbEngine)
+        #table.query().all()
+        #female_pop = db.func.sum(db.case([(census.columns.sex == 'F', census.columns.pop2000)],else_=0))
+        #total_pop = db.cast(db.func.sum(census.columns.pop2000), db.Float)
+        #query = db.select([female_pop/total_pop * 100])
+        #result = connection.execute(query).scalar()
+        #print(result)
+
+        
+        
+    # def TableInsert(self, tableName:str):
+    #     query = my_table.insert()
+    #     query.values({'column': value1, 'column2': value2})
+    #     this is then executed with
+
+    #     my_session = Session(engine)
+    #     my_session.execute(query)
+    #     my_session.close()        
+
+
+    # def DBDropAll(self):
+    #     print("DB Drop Start")
+    #     self.self.dbEngine.drop_all()
+    #     print("DB Drop Complete")
+
+
+    # def DBSeed(self):
+    #     print("DB Seed Start")
+    #     self.DBSeedCountries()
+    #     print("DB Seed Complete")
+    #     pass
+
+
+    # def DBSeedCountries(self):
+    #     datName = 'Countries'
+    #     print(f'Start Seeding {datName}')
+    #     print(f'Delete Existing  {datName}')
+    #     exiCountries = Country.query.delete()
+    #     self.dbEngine.session.commit()
+    #     print(f'Deleted {str(exiCountries)} {datName}')
+    #     countries=[]
+    #     countries.append(Country(Name='United States of America', Code='USA'))
+    #     countries.append(Country(Name='United Kingdom', Code='GBR'))
+    #     countries.append(Country(Name='Germany', Code='DEU'))
+    #     countries.append(Country(Name='France', Code='FRA'))
+    #     countries.append(Country(Name='India', Code='IND'))
+    #     countries.append(Country(Name='China', Code='CHN'))
+    #     countries.append(Country(Name='Japan', Code='JPN'))
+    #     countries.append(Country(Name='Korea', Code='KOR'))
+    #     self.dbEngine.session.add_all(countries)
+    #     self.dbEngine.session.commit()
+    #     CountriesCount = str(len(countries))
+    #     print(f'Created {CountriesCount} {datName}')
+    #     print(f'Completed Seeding {datName}')
+    #     pass
+
+
+    # def SetUserDefaultPasswords(self):
+    #     print(f'Started SetUserDefaultPasswords')
+    #     users = User.query.all()
+    #     for user in users:
+    #         user.setPassword('password')
+    #     self.self.dbEngine.session.add_all(users)
+    #     self.self.dbEngine.session.commit()
+    #     print(f'Completed SetUserDefaultPasswords')
+    #     pass
+
+
+    # def GetUserByID(self, ID):
+    #     print(f'Started GetUserByID' + str(ID))
+    #     user = User.query.filter_by(ID=ID).first()
+    #     print(user)
+    #     print(f'Completed GetUserByID')
+    #     pass
+
+
+    # def GetTransactions(self):
+    #     print(f'Started GetTransactions')
+    #     distinctyears=['2017']
+    #     brokerageaccounts=['81dd5ffb-3c7b-4699-b3cf-48f3ef4014bf']
+    #     iquery = self.self.dbEngine.session.query(Transaction).filter(extract('year', Transaction.SellDate).in_(distinctyears)).filter(Transaction.BrokerageAccountID.in_(brokerageaccounts)).order_by(Transaction.SellDate)
+    #     DataColumns=['ID', 'BrokerageAccountID', 'CompanyID', 'BrokerageAccount', 'Company', 'Quantity', 'BuyDate', 'BuyPrice', 'SellDate', 'SellPrice']
+    #     print(iquery.statement)
+    #     items = iquery.all()
+    #     listitems = []
+    #     for item in items:
+    #         itemvalues = [item.ID, item.BrokerageAccountID, item.CompanyID, item.ParentBrokerageAccount.Name, item.ParentCompany.Symbol, item.Quantity, item.BuyDate, item.BuyPrice, item.SellDate, item.SellPrice]
+    #         zipped = zip(DataColumns, itemvalues)
+    #         a_dictionary = dict(zipped)
+    #         listitems.append(a_dictionary)
+    #     dfData = pd.DataFrame(listitems, columns=DataColumns)
+    #     dfData['BuyAmount']= dfData.Quantity * dfData.BuyPrice
+    #     dfData['SellAmount']= dfData.Quantity * dfData.SellPrice
+    #     dfData['PLAmount']= dfData.SellAmount - dfData.BuyAmount
+    #     dg = pd.DataFrame(dfData.groupby(dfData['SellDate'].dt.strftime('%B'))['PLAmount'].sum().sort_values())
+    #     print('Printing dg')
+    #     print(dg.columns)
+    #     print(dg)
+    #     dg.reset_index(inplace=True)
+    #     print(dg.columns)
+    #     print('Printing dg after Index Reset')
+    #     print(dg)
+    #     jan = dg.loc[dg['SellDate'] == 'January', 'PLAmount'].iloc[0] 
+    #     print(jan)
+    #     jul = Utils.DataframeLookup(dg, 'SellDate', 'July', 0)
+    #     print(jul)
+    #     print(f'Completed GetTransactions')
+    #     pass
+
+
+    # def GetBrokerageSnapshotData(self):
+    #     datName = 'Brokerage Snapshot Data'
+    #     exiCountries = Country.query.delete()
+    #     self.dbEngine.session.commit()
+    #     print(f'Deleted {str(exiCountries)} {datName}')
+    #     countries=[]
+    #     countries.append(Country(Name='United States of America', Code='USA'))
+    #     countries.append(Country(Name='United Kingdom', Code='GBR'))
+    #     countries.append(Country(Name='Germany', Code='DEU'))
+    #     countries.append(Country(Name='France', Code='FRA'))
+    #     countries.append(Country(Name='India', Code='IND'))
+    #     countries.append(Country(Name='China', Code='CHN'))
+    #     countries.append(Country(Name='Japan', Code='JPN'))
+    #     countries.append(Country(Name='Korea', Code='KOR'))
+    #     self.dbEngine.session.add_all(countries)
+    #     self.dbEngine.session.commit()
+    #     CountriesCount = str(len(countries))
+    #     print(f'Created {CountriesCount} {datName}')
+    #     print(f'Completed Seeding {datName}')
+    #     pass
+
+
+    # def AddCompanies(self):
+    #     print('Executing AddCompanies')
+    #     companies=[]
+    #     companies.append(Company(Name='GM', Symbol='GM'))
+    #     self.dbEngine.session.add_all(companies)
+    #     self.dbEngine.session.commit()
+    #     print('Finished AddCompanies')
+    #     pass
+
+
+    # def GetPortfolio(self):
+    #     print(f'Started GetPortfolio')
+    #     brokerageaccounts=['b92960ad-8bdd-4194-af27-14b680d5dce0']
+    #     iquery = self.dbEngine.session.query(Tranche).filter(Tranche.BrokerageAccountID.in_(brokerageaccounts))\
+    #                 .outerjoin(CompanyEval, Tranche.CompanyID==CompanyEval.CompanyID)\
+    #                 .add_columns(CompanyEval.CurrentDate, CompanyEval.CurrentPrice)\
+    #                 .order_by(Tranche.CompanyID, Tranche.BuyDate)
+    #     print(iquery.statement)
+    #     items = iquery.all()
+    #     print(items)
+    #     for item in items:
+    #         print(item)
+
+
+    # def GetBrokerageAccountCompanies(self, brkactID):
+    #     iquery = self.dbEngine.session.query(Tranche).filter(Tranche.BrokerageAccountID==brkactID)\
+    #                 .join(Company, Tranche.CompanyID==Company.ID)\
+    #                 .order_by(Tranche.CompanyID, Tranche.BuyDate)
+    #     print(iquery.statement)
+    #     items = iquery.all()
+    #     print(items)
+    #     for item in items:
+    #         print(item)
+    #     return items
+
+
+    # def DBDropAll(self):
+    #     print("DB Drop Start")
+    #     self.dbEngine.drop_all()
+    #     print("DB Drop Complete")
+
+
+    # def DBSeed(self):
+    #     print("DB Seed Start")
+    #     DBSeedCountries()
+    #     print("DB Seed Complete")
+    #     pass
+
+
+    # def DBSeedCountries(self):
+    #     datName = 'Countries'
+    #     print(f'Start Seeding {datName}')
+    #     print(f'Delete Existing  {datName}')
+    #     exiCountries = Country.query.delete()
+    #     self.dbEngine.session.commit()
+    #     print(f'Deleted {str(exiCountries)} {datName}')
+    #     countries=[]
+    #     countries.append(Country(Name='United States of America', Code='USA'))
+    #     countries.append(Country(Name='United Kingdom', Code='GBR'))
+    #     countries.append(Country(Name='Germany', Code='DEU'))
+    #     countries.append(Country(Name='France', Code='FRA'))
+    #     countries.append(Country(Name='India', Code='IND'))
+    #     countries.append(Country(Name='China', Code='CHN'))
+    #     countries.append(Country(Name='Japan', Code='JPN'))
+    #     countries.append(Country(Name='Korea', Code='KOR'))
+    #     self.dbEngine.session.add_all(countries)
+    #     self.dbEngine.session.commit()
+    #     CountriesCount = str(len(countries))
+    #     print(f'Created {CountriesCount} {datName}')
+    #     print(f'Completed Seeding {datName}')
+    #     pass
+
+
+    # def SetUserDefaultPasswords(self):
+    #     print(f'Started SetUserDefaultPasswords')
+    #     users = User.query.all()
+    #     for user in users:
+    #         user.setPassword('password')
+    #     self.dbEngine.session.add_all(users)
+    #     self.dbEngine.session.commit()
+    #     print(f'Completed SetUserDefaultPasswords')
+    #     pass
+
+
+    # def GetUserByID(self, ID):
+    #     print(f'Started GetUserByID' + str(ID))
+    #     user = User.query.filter_by(ID=ID).first()
+    #     print(user)
+    #     print(f'Completed GetUserByID')
+    #     pass
+
+
+    # def GetTransactions(self):
+    #     print(f'Started GetTransactions')
+    #     distinctyears=['2017']
+    #     brokerageaccounts=['81dd5ffb-3c7b-4699-b3cf-48f3ef4014bf']
+    #     iquery = self.dbEngine.session.query(Transaction).filter(extract('year', Transaction.SellDate).in_(distinctyears)).filter(Transaction.BrokerageAccountID.in_(brokerageaccounts)).order_by(Transaction.SellDate)
+
+    #     DataColumns=['ID', 'BrokerageAccountID', 'CompanyID', 'BrokerageAccount', 'Company', 'Quantity', 'BuyDate', 'BuyPrice', 'SellDate', 'SellPrice']
+    #     dfData = pd.DataFrame(columns=DataColumns)
+    #     print(iquery.statement)
+    #     items = iquery.all()
+    #     for item in items:
+    #         print(item)
+    #         print(type(item))
+    #         print(item.ParentBrokerageAccount)
+    #         print(type(item.ParentBrokerageAccount))
+    #         print(item.ParentCompany)
+    #         print(type(item.ParentCompany))
+
+    #     print(f'Completed GetTransactions')
+    #     pass

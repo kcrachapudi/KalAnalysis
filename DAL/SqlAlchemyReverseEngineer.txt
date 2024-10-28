@@ -1,0 +1,42 @@
+Create Models from Existing database
+import sqlalchemy
+from sqlalchemy.ext.automap import automap_base
+from sqlalchemy.orm import sessionmaker
+
+from config import POSTGRES_URI
+
+engine = sqlalchemy.create_engine(POSTGRES_URI, pool_pre_ping=True)
+Session = sessionmaker(bind=engine)
+
+# these two lines perform the "database reflection" to analyze tables and relationships
+Base = automap_base()
+Base.prepare(engine, reflect=True)
+
+# there are many tables in the database but I want `products` and `categories`
+# only so I can leave others out
+Product = Base.classes.products
+Category = Base.classes.categories
+
+# for debugging and passing the query results around
+# I usually add as_dict method on the classes
+def as_dict(obj):
+    data = obj.__dict__
+    data.pop('_sa_instance_state')
+    return data
+
+# add the `as_dict` function to the classes
+for c in [Product, Category]:
+    c.as_dict = as_dict
+Now we can use the mapped classes Product and Category as any other SQLAlchemy model classes.
+
+1
+2
+3
+4
+5
+6
+q = session.query(Product.id, Product.title)
+q = q.filter(Product.price > 100)
+
+# e.g return this as a rest-api response
+products = [r.as_dict() for r in q]
