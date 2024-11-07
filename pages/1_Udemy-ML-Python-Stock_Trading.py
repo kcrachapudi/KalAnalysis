@@ -7,7 +7,7 @@ from datetime import date, time
 import yfinance as yf
 import yahoofinancials as YahooFinancials
 from StreamlitExtras import StreamlitControls as stc
-    
+import plotly.express as px
 import warnings
 warnings.filterwarnings('ignore')
 
@@ -18,8 +18,8 @@ startYear = None
 
 def init():
     # Algorithm to Predict Tomorrow's Stock Direction (Up or Down) based on Past Data
-    ticker = stc.Custom_TextInput("Ticker", '', 'txtTicker')
-    startYear = stc.Custom_TextInput("Start Year", '', 'txtStartYear')
+    st.session_state.ticker = stc.Custom_TextInput("Ticker", '', 'txtTicker')
+    st.session_state.startYear = stc.Custom_TextInput("Start Year", '', 'txtStartYear')
     
 
 def DownloadAndProcessData(startYear, ticker):
@@ -38,8 +38,7 @@ def DownloadAndProcessData(startYear, ticker):
 
     #Chart the Stock Performance
     st.write(dfData.head())
-    dfData.plot(y='close', title='AAPL Stock Performance')
-    plt.show()
+    st.line_chart(dfData, y='close')
 
 init()
        
@@ -49,6 +48,6 @@ def SubmitClick():
         st.session_state.startYear = st.session_state['txtStartYear']
     DownloadAndProcessData(st.session_state.startYear, st.session_state.ticker)
            
-stc.Custom_Button(label="Submit", key='btnSubmit', action=SubmitClick)
+stc.Custom_Button(label="DownloadAndProcessData", key='btnSubmit', action=SubmitClick)
 
 
