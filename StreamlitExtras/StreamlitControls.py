@@ -1,4 +1,5 @@
 import streamlit as st
+import pandas as pd
 
 def Custom_TextInput(label, default_value, key):
     """
@@ -61,3 +62,18 @@ def Custom_Button(label, key, action):
     """
     # Create a button with the specified label and key
     st.button(label=label, key=key, on_click=action)
+    
+    
+def Container_AddDataframe(container, dfData:pd.DataFrame, printType='all'):
+    with container.container():
+        if(printType == 'all'):
+            st.write(dfData)
+        elif(printType == 'head'):
+            st.write(dfData.head())
+        elif(printType=='tail'):
+            st.write(dfData.tail())
+
+
+def Container_AddChart(container, chart):
+    with container.container():
+        st.write(chart)

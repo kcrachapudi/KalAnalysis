@@ -103,3 +103,76 @@ if(prediction == 1):
     print("Todays Return Forecast: UP")
 else:
     print("Todays Return Forecast: DOWN")
+
+
+import time
+
+st.button("Start over")
+
+placeholder = st.empty()
+placeholder.markdown("Hello")
+time.sleep(1)
+
+placeholder.progress(0, "Wait for it...")
+time.sleep(1)
+placeholder.progress(50, "Wait for it...")
+time.sleep(1)
+placeholder.progress(100, "Wait for it...")
+time.sleep(1)
+
+with placeholder.container():
+    st.line_chart({"data": [1, 5, 2, 6]})
+    time.sleep(1)
+    st.markdown("3...")
+    time.sleep(1)
+    st.markdown("2...")
+    time.sleep(1)
+    st.markdown("1...")
+    time.sleep(1)
+
+placeholder.markdown("Poof!")
+time.sleep(1)
+
+placeholder.empty()
+
+
+Session State and Widget State association
+Session State provides the functionality to store variables across reruns. 
+Widget state (i.e. the value of a widget) is also stored in a session.
+
+For simplicity, we have unified this information in one place. i.e. the Session State. 
+This convenience feature makes it super easy to read or write to the widget's state anywhere in the app's code. Session State variables mirror the widget value using the key argument.
+
+We illustrate this with the following example. Let's say we have an app with a slider to represent temperature in Celsius. 
+We can set and get the value of the temperature widget by using the Session State API, as follows:
+
+import streamlit as st
+
+if "celsius" not in st.session_state:
+    # set the initial default value of the slider widget
+    st.session_state.celsius = 50.0
+
+st.slider(
+    "Temperature in Celsius",
+    min_value=-100.0,
+    max_value=100.0,
+    key="celsius"
+)
+
+# This will get the value of the slider widget
+st.write(st.session_state.celsius)
+There is a limitation to setting widget values using the Session State API.
+
+priority_high
+Important
+Streamlit does not allow setting widget values via the Session State API for st.button and st.file_uploader.
+
+The following example will raise a StreamlitAPIException on trying to set the state of st.button via the Session State API:
+
+import streamlit as st
+
+if 'my_button' not in st.session_state:
+    st.session_state.my_button = True
+    # Streamlit will raise an Exception on trying to set the state of button
+
+st.button('Submit', key='my_button')

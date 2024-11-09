@@ -16,11 +16,20 @@ st.session_state.startYear = None
 ticker = None
 startYear = None
 
+#@st.cache_resource #Run this only Once
 def init():
     # Algorithm to Predict Tomorrow's Stock Direction (Up or Down) based on Past Data
     st.session_state.ticker = stc.Custom_TextInput("Ticker", '', 'txtTicker')
     st.session_state.startYear = stc.Custom_TextInput("Start Year", '', 'txtStartYear')
+    st.session_state.table1 = st.container()
+    st.session_state.table1.markdown("...")
+    st.session_state.table2 = st.container()
+    st.session_state.table2.markdown("...")
+    st.session_state.chart1 = st.container()
+    st.session_state.chart1.markdown("...")
     
+init()
+
 
 def DownloadAndProcessData(startYear, ticker):
     #Download Historical Data
@@ -28,7 +37,8 @@ def DownloadAndProcessData(startYear, ticker):
     enddate=date.today()
     dfData:pd.DataFrame = yf.download(ticker, start=startdate, end=enddate, progress=False)
 
-    st.write(dfData.head())
+    stc.Container_AddDataframe(container=st.session_state.table1, dfData=dfData, printType='head')
+    #st.write(dfData.head())
     #Remove Ticker row from Column Name
     dfData = dfData.droplevel(1, axis=1)
 
@@ -37,10 +47,11 @@ def DownloadAndProcessData(startYear, ticker):
     dfData.rename(columns=rename_dict, inplace=True)
 
     #Chart the Stock Performance
-    st.write(dfData.head())
-    st.line_chart(dfData, y='close')
+    stc.Container_AddDataframe(container=st.session_state.table1, dfData=dfData, printType='head')
+    #st.write(dfData.head())
+    #st.line_chart(dfData, y='close')
+    stc.Container_AddChart(container=st.session_state.chart1, chart=px.line(dfData, y='close'))
 
-init()
        
 def SubmitClick():
     if st.session_state.ticker is  None or len(st.session_state.ticker) == 0 or st.session_state.startYear is None or len(st.session_state.startYear) == 0:
