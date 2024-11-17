@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 
+
 def Custom_TextInput(label, default_value, key):
     """
     Create a custom text input field with a default value.
@@ -62,6 +63,21 @@ def Custom_Button(label, key, action):
     """
     # Create a button with the specified label and key
     st.button(label=label, key=key, on_click=action)
+    
+    
+def Custom_CheckBox(label, key, action):
+    """
+    Create a custom checkbox with a label.
+
+    Args:
+        label (str): The label for the checkbox.
+        key (str): The key for the checkbox.
+
+    Returns:
+        None
+    """
+    # Create a checkbox with the specified label and key
+    st.checkbox(label, key=key, on_change=action)
     
     
 def Container_AddDataframe(container, dfData:pd.DataFrame, printType='all'):

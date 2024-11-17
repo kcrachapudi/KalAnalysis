@@ -13,26 +13,19 @@ import numpy as np
 import pandas_ta as ta
 warnings.filterwarnings('ignore')
 
-st.session_state.ticker = None
-st.session_state.startYear = None
-ticker = None
-startYear = None
+st.session_state.ticker = st.sidebar.text_input("Enter the Ticker")
+st.session_state.startYear = st.sidebar.text_input("Enter the Start Year")
 
-#@st.cache_resource #Run this only Once
-def init():
-    # Algorithm to Predict Tomorrow's Stock Direction (Up or Down) based on Past Data
-    if 'dfData' not in st.session_state:
-        st.session_state.dfData = pd.DataFrame()
-
-
-init()
-
-
-def DownloadAndProcessData(startYear, ticker):
+def DownloadAndProcessData():
+    st.write(f"Stage 1 Processed! Ticker: {st.session_state.ticker}, StartYear: {st.session_state.startYear}")
     #Download Historical Data
-    startdate= startYear + '-01-01'
+    startdate= st.session_state.startYear + '-01-01'
     enddate=date.today()
-    st.session_state.dfData = yf.download(ticker, start=startdate, end=enddate, progress=False)
+    st.session_state.dfData = yf.download(st.session_state.ticker, start=startdate, end=enddate, progress=False)
+
+    st.session_state.table1 = st.empty()
+    st.session_state.table2 = st.empty()
+    st.session_state.chart1 = st.empty()
 
     stc.Container_AddDataframe(container=st.session_state.table1, dfData=st.session_state.dfData, printType='head')
     #st.write(dfData.head())
@@ -48,10 +41,21 @@ def DownloadAndProcessData(startYear, ticker):
     #st.write(dfData.head())
     #st.line_chart(dfData, y='close')
     stc.Container_AddChart(container=st.session_state.chart1, chart=px.line(st.session_state.dfData, y='close'))
+    st.session_state.submitted = True
+    
 
-
-def CreateTAIndicatorsAndPlot(dfData:pd.DataFrame):
+def CreateTAIndicatorsAndPlot():
     #Create Technical Analysis Indicators and Plot 
+    if(st.session_state.dfData.empty):
+        return
+    
+    st.session_state.table3 = st.empty()
+    st.session_state.table4 = st.empty()
+    st.session_state.table5 = st.empty()
+    st.session_state.chart2 = st.empty()
+    st.session_state.chart3 = st.empty()
+
+    dfData = st.session_state.dfData
     # Calculate RSI
     dfData['RSI-2'] = ta.rsi(dfData['close'], length=2)
     dfData['RSI-7'] = ta.rsi(dfData['close'], length=7)
@@ -77,7 +81,7 @@ def CreateTAIndicatorsAndPlot(dfData:pd.DataFrame):
     stc.Container_AddChart(container=st.session_state.chart3, chart=px.line(dfData, y='CCI-100'))
     
 
-def PrepareAndLabelData(dfData:pd.DataFrame):
+def PrepareAndLabelData():
     #Prepare Data Labelling
     #What are we doing here?
     #When we place our trade: Buy at Open(over the next day). We want to close our trade: At the next day at the Open.
@@ -87,47 +91,22 @@ def PrepareAndLabelData(dfData:pd.DataFrame):
     #SELL SIGNAL: Open(-2)<Open(-1)
     #Indicators that represent our current situation, and labels take a look ahead of time to determine if we have a pattern.
 
+    if(st.session_state.dfData.empty):
+        return
+    dfData = st.session_state.dfData
+    
+    st.session_state.table6 = st.empty()
+    
     #Prepare Data for Machine Learning
     #Create Target Column
     dfData['label'] = np.where(dfData['open'].shift(-2).gt(dfData['open'].shift(-1)), '1', '0')
     dfData.dropna(inplace=True)
     stc.Container_AddDataframe(container=st.session_state.table6, dfData=dfData, printType='tail')
 
-           
-def DownloadAndProcessDataClick():
-    if st.session_state.ticker is  None or len(st.session_state.ticker) == 0 or st.session_state.startYear is None or len(st.session_state.startYear) == 0:
-        st.session_state.ticker = st.session_state["txtTicker"]
-        st.session_state.startYear = st.session_state['txtStartYear']
-    DownloadAndProcessData(st.session_state.startYear, st.session_state.ticker)
-           
-           
-def CreateTAIndicatorsAndPlotClick():
-    if st.session_state.dfData is not None or len(st.session_state.dfData) > 0:
-        CreateTAIndicatorsAndPlot(st.session_state.dfData) 
 
-
-def PrepareAndLabelDataClick():
-    if st.session_state.dfData is not None or len(st.session_state.dfData) > 0:
-        PrepareAndLabelData(st.session_state.dfData) 
-
-
-def SetLayout():    
-    st.session_state.ticker = stc.Custom_TextInput("Ticker", '', 'txtTicker')
-    st.session_state.startYear = stc.Custom_TextInput("Start Year", '', 'txtStartYear')
+def StartProcess():
+    DownloadAndProcessData()
+    CreateTAIndicatorsAndPlot()
+    PrepareAndLabelData()
     
-    stc.Custom_Button(label="DownloadAndProcessData", key='btnDownloadAndProcessData', action=DownloadAndProcessDataClick)
-    st.session_state.table1 = st.container()
-    st.session_state.table2 = st.container()
-    st.session_state.chart1 = st.container()
-    
-    stc.Custom_Button(label="CreateTAIndicatorsAndPlot", key='btnCreateTAIndicatorsAndPlot', action=CreateTAIndicatorsAndPlotClick)    
-    st.session_state.table3 = st.container()
-    st.session_state.table4 = st.container()
-    st.session_state.table5 = st.container()
-    st.session_state.chart2 = st.container()
-    st.session_state.chart3 = st.container()
-    
-    stc.Custom_Button(label="PrepareAndLabelData", key='btnPrepareAndLabelData', action=PrepareAndLabelDataClick)
-    st.session_state.table6 = st.container()
-
-SetLayout()
+btnStartProcess = st.sidebar.button(label="Start Process", on_click=StartProcess)
