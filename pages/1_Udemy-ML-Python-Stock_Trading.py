@@ -16,13 +16,20 @@ warnings.filterwarnings('ignore')
 st.session_state.ticker = st.sidebar.text_input("Enter the Ticker")
 st.session_state.startYear = st.sidebar.text_input("Enter the Start Year")
 
+
+@st.cache_data
+def GetTickerData(ticker, startdate, enddate):
+    return yf.download(ticker, start=startdate, end=enddate, progress=False)
+    
+    
 def DownloadAndProcessData():
     st.write(f"Stage 1 Processed! Ticker: {st.session_state.ticker}, StartYear: {st.session_state.startYear}")
     #Download Historical Data
     startdate= st.session_state.startYear + '-01-01'
     enddate=date.today()
-    st.session_state.dfData = yf.download(st.session_state.ticker, start=startdate, end=enddate, progress=False)
-
+    
+    st.session_state.dfData = GetTickerData(st.session_state.ticker, startdate, enddate)
+    
     st.session_state.table1 = st.empty()
     st.session_state.table2 = st.empty()
     st.session_state.chart1 = st.empty()
