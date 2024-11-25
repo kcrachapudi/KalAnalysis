@@ -100,20 +100,97 @@ def PrepareAndLabelData():
 
     if(st.session_state.dfData.empty):
         return
-    dfData = st.session_state.dfData
-    
+        
     st.session_state.table6 = st.empty()
     
     #Prepare Data for Machine Learning
     #Create Target Column
-    dfData['label'] = np.where(dfData['open'].shift(-2).gt(dfData['open'].shift(-1)), '1', '0')
-    dfData.dropna(inplace=True)
-    stc.Container_AddDataframe(container=st.session_state.table6, dfData=dfData, printType='tail')
+    st.session_state.dfData['label'] = np.where(st.session_state.dfData['open'].shift(-2).gt(st.session_state.dfData['open'].shift(-1)), '1', '0')
+    st.session_state.dfData.dropna(inplace=True)
+    stc.Container_AddDataframe(container=st.session_state.table6, dfData=st.session_state.dfData, printType='tail')
+
+
+def SetupNeuralNetwork():
+    #Creating a Nueral Network
+    import sklearn
+    from sklearn.neural_network import MLPClassifier, MLPRegressor
+    from sklearn.model_selection import train_test_split
+    from sklearn.metrics import mean_squared_error, r2_score, classification_report, confusion_matrix
+    from math import sqrt
+
+    #Fitting Indicators and Labelling
+    X = st.session_state.dfData[st.session_state.dfData.columns[6:-1]].values
+    y = st.session_state.dfData['label'].values
+
+    #Split Data into Training and Test
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3)
+    mlp = MLPClassifier(hidden_layer_sizes=(8,8,8), activation='relu', solver='adam', max_iter=1000)
+    mlp.fit(X_train, y_train)
+
+    predict_train = mlp.predict(X_train)
+    predict_test = mlp.predict(X_test)
+
+    #Train the Model
+    report_train = classification_report(y_train, predict_train)
+    st.write('Train Data Report')
+    st.write(report_train)
+
+    #Test the Model
+    report_test = classification_report(y_test, predict_test)
+    st.write('Test Data Report')
+    st.write(report_test)
+
+    #Evaluate the Model
+    #BackTesting our Model
+    #Measure the returns obtained by our trading model
+
+    st.session_state.dfData['Prediction'] = np.append(predict_train, predict_test)
+    st.session_state.dfData['StrategyReturns'] = np.where(st.session_state.dfData['Prediction']=="1", st.session_state.dfData['open'].shift(-2)-st.session_state.dfData['open'].shift(-1), 0)
+
+    st.session_state.dfData['CumulativeReturns'] = np.cumsum(st.session_state.dfData['StrategyReturns'])
+    st.session_state.dfData.plot(y='CumulativeReturns')
+    # Add labels
+    plt.xlabel('Year')
+    plt.ylabel('CumulativeReturns')
+    plt.title('Cumulative Returns over Years')
+
+    # Show the plot
+    plt.show()
+
+
+def ChartCumulativeReturns():
+    #Chart Cumulative Returns
+    st.session_state.dfData.plot(y='CumulativeReturns')
+    # Add labels
+    plt.xlabel('Year')
+    plt.ylabel('CumulativeReturns')
+    plt.title('Cumulative Returns over Years')
+    # Show the plot
+    plt.show()
+
+    st.session_state.dfData['CumulativeReturns'].plot()
+    # Add labels
+    plt.xlabel('Year')
+    plt.ylabel('CumulativeReturns')
+    plt.title('Cumulative Returns over Years')
+    # Show the plot
+    plt.show()
+
+
+def Prediction():
+    prediction = st.session_state.dfData.iloc[-1]['Prediction']
+    if(prediction == 1):
+        st.write("Todays Return Forecast: UP")
+    else:
+        st.write("Todays Return Forecast: DOWN")
 
 
 def StartProcess():
     DownloadAndProcessData()
     CreateTAIndicatorsAndPlot()
     PrepareAndLabelData()
+    SetupNeuralNetwork()
+    ChartCumulativeReturns()
+    Prediction()
     
 btnStartProcess = st.sidebar.button(label="Start Process", on_click=StartProcess)
