@@ -6,3 +6,10 @@ font = "sans serif"
 
 [server]
 enableXsrfProtection = false
+
+[client]
+showErrorDetails = false
+
+[global]
+disableWidgetStateDuplicationWarning = true
+showWarningOnDirectExecution = false

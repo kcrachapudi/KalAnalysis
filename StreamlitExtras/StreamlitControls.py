@@ -93,3 +93,8 @@ def Container_AddDataframe(container, dfData:pd.DataFrame, printType='all'):
 def Container_AddChart(container, chart):
     with container.container():
         st.write(chart)
+        
+
+def Container_AddPyPlot(container, chart):
+    with container.container():
+        st.pyplot(chart)        

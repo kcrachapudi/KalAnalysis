@@ -117,48 +117,35 @@ def SetupNeuralNetwork():
     from sklearn.model_selection import train_test_split
     from sklearn.metrics import mean_squared_error, r2_score, classification_report, confusion_matrix
     from math import sqrt
-
     #Fitting Indicators and Labelling
     X = st.session_state.dfData[st.session_state.dfData.columns[6:-1]].values
     y = st.session_state.dfData['label'].values
-
     #Split Data into Training and Test
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3)
     mlp = MLPClassifier(hidden_layer_sizes=(8,8,8), activation='relu', solver='adam', max_iter=1000)
     mlp.fit(X_train, y_train)
-
     predict_train = mlp.predict(X_train)
     predict_test = mlp.predict(X_test)
-
     #Train the Model
     report_train = classification_report(y_train, predict_train)
     st.write('Train Data Report')
     st.write(report_train)
-
     #Test the Model
     report_test = classification_report(y_test, predict_test)
     st.write('Test Data Report')
     st.write(report_test)
-
     #Evaluate the Model
     #BackTesting our Model
     #Measure the returns obtained by our trading model
-
     st.session_state.dfData['Prediction'] = np.append(predict_train, predict_test)
     st.session_state.dfData['StrategyReturns'] = np.where(st.session_state.dfData['Prediction']=="1", st.session_state.dfData['open'].shift(-2)-st.session_state.dfData['open'].shift(-1), 0)
-
     st.session_state.dfData['CumulativeReturns'] = np.cumsum(st.session_state.dfData['StrategyReturns'])
-    st.session_state.dfData.plot(y='CumulativeReturns')
-    # Add labels
-    plt.xlabel('Year')
-    plt.ylabel('CumulativeReturns')
-    plt.title('Cumulative Returns over Years')
-
-    # Show the plot
-    plt.show()
 
 
 def ChartCumulativeReturns():
+    st.session_state.chart4 = st.empty()
+    st.session_state.chart5 = st.empty()
+
     #Chart Cumulative Returns
     st.session_state.dfData.plot(y='CumulativeReturns')
     # Add labels
@@ -166,7 +153,7 @@ def ChartCumulativeReturns():
     plt.ylabel('CumulativeReturns')
     plt.title('Cumulative Returns over Years')
     # Show the plot
-    plt.show()
+    stc.Container_AddPyPlot(container=st.session_state.chart4, chart=plt.show())
 
     st.session_state.dfData['CumulativeReturns'].plot()
     # Add labels
@@ -174,15 +161,18 @@ def ChartCumulativeReturns():
     plt.ylabel('CumulativeReturns')
     plt.title('Cumulative Returns over Years')
     # Show the plot
-    plt.show()
+    stc.Container_AddPyPlot(container=st.session_state.chart5, chart=plt.show())
 
 
 def Prediction():
-    prediction = st.session_state.dfData.iloc[-1]['Prediction']
+    last_row = st.session_state.dfData.iloc[-1]
+    prediction = last_row['Prediction']
+    strPrediction = ''
     if(prediction == 1):
-        st.write("Todays Return Forecast: UP")
+        strPrediction = 'UP'
     else:
-        st.write("Todays Return Forecast: DOWN")
+        strPrediction = 'DOWN'
+    st.write(f"Return Forecast for Today {last_row.Date} is : {strPrediction}")
 
 
 def StartProcess():
