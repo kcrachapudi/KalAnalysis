@@ -2,14 +2,13 @@ import streamlit as st
 from fileinput import filename
 import pandas as pd
 import hvplot.pandas
-from path import Path
+from pathlib import Path
 from sklearn.cluster import KMeans
 from sklearn.decomposition import PCA
 from sklearn.preprocessing import StandardScaler
 
 from ..Utils import Utils
 from . import DataFramer
-from st_aggrid import GridOptionsBuilder, AgGrid, GridUpdateMode, DataReturnMode
 import holoviews as hv
 import numpy as np
 import Intelligence.Aggridder as Aggridder
