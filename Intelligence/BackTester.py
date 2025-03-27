@@ -7,11 +7,11 @@ from sklearn.cluster import KMeans
 from sklearn.decomposition import PCA
 from sklearn.preprocessing import StandardScaler
 
-from ..Utils import Utils
+from Utilities import Utils
 from . import DataFramer
 import holoviews as hv
 import numpy as np
-import Intelligence.Aggridder as Aggridder
+
 
 def BackTesterInit(dfData, initialCapital, shareSize):
     st.write('BackTest Processing of Algorithm...')

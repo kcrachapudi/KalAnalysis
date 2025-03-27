@@ -2,7 +2,7 @@ import streamlit as st
 import plotly.figure_factory as ff
 import pandas as pd
 import numpy as np
-from Utils import Utils
+from Utilities import Utils
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 """

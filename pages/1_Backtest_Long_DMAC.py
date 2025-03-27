@@ -10,7 +10,7 @@ from Intelligence import DataFramer, BackTester
 import holoviews as hv
 import numpy as np
 import Intelligence.Aggridder as Aggridder
-from Utils import Utils
+from Utilities import Utils
 
 with st.spinner('Retrieving and loading Stock Data...'):
     st.write("CSV Data loaded into DataFrame")

@@ -4,3 +4,4 @@ hvplot
 pandas
 plotly
 scikit-learn
+setuptools
