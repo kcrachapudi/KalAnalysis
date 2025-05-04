@@ -4,7 +4,7 @@ import pandas as pd  # Data manipulation
 import numpy as np  # Numerical operations
 import datetime  # Date handling
 from sklearn.preprocessing import MinMaxScaler  # Normalize input features
-from sklearn.metrics import mean_squared_error, mean_absolute_error  # Evaluation metrics
+from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score  # Evaluation metrics
 from tensorflow.keras.models import Model, load_model  # Keras Model API
 from tensorflow.keras.layers import Input, LSTM, Bidirectional, Dense, Dropout, Attention, Concatenate  # Model layers
 from tensorflow.keras.losses import MeanSquaredError
@@ -24,7 +24,7 @@ epochs = st.sidebar.slider("Training Epochs", min_value=5, max_value=100, value=
 batch_size = st.sidebar.slider("Batch Size", min_value=16, max_value=128, value=32, step=16)
 save_model_option = st.sidebar.checkbox("Save Trained Model", value=True)
 load_model_option = st.sidebar.checkbox("Load Existing Model if Available", value=True)
-
+model_path =  f"A1_StockPricePredictor_model.h5"
 # Download historical stock data from Yahoo Finance
 data = yf.download(ticker, start=start_date, end=end_date, multi_level_index=False)
 
@@ -112,22 +112,19 @@ def build_model(input_shape):
     x = Dropout(0.2)(x)
     outputs = Dense(1)(x)
     model = Model(inputs, outputs)
-    #model.compile(optimizer='adam', loss='mse')
-    model.compile(optimizer='adam', loss=tensorflow.keras.MeanSquaredError())
+    model.compile(optimizer='adam', loss=MeanSquaredError())
     return model
 
-# Load or train model
-model_path = f"model_{ticker}.h5"
-if load_model_option and os.path.exists(model_path):
-    model = load_model(model_path, compile=True)
-    st.info(f"Loaded existing model for {ticker}.")
+# Train model
+if os.path.exists(model_path):
+    model = load_model(model_path, compile=False)
+    model.compile(optimizer='adam', loss=MeanSquaredError())
+    st.success("Loaded existing model.")
 else:
     model = build_model((X.shape[1], X.shape[2]))
     with st.spinner("Training model..."):
         model.fit(X, y, epochs=epochs, batch_size=batch_size, verbose=0)
-    if save_model_option:
         model.save(model_path)
-        st.success(f"Model saved as {model_path}")
 
 # Predict
 preds = model.predict(X)
@@ -137,8 +134,10 @@ preds_inverse = scaler.inverse_transform(np.concatenate([preds, np.zeros((preds.
 # Metrics
 rmse = np.sqrt(mean_squared_error(actual, preds_inverse))
 mae = mean_absolute_error(actual, preds_inverse)
+r2 = r2_score(actual, preds_inverse)
 st.metric("RMSE", f"{rmse:.2f}")
 st.metric("MAE", f"{mae:.2f}")
+st.metric("R² Score", f"{r2:.2f}")
 
 # Plot actual vs predicted
 fig = go.Figure()
