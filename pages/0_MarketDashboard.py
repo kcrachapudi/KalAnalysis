@@ -4,7 +4,6 @@ import pandas as pd
 import numpy as np
 import datetime as dt
 
-st.set_page_config(page_title="Market Grid Dashboard", layout="wide")
 st.title("📊 Market Dashboard")
 
 symbols = {

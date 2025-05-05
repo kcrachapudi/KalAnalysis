@@ -15,6 +15,7 @@ import io  # For CSV download
 import os  # For checking model existence
 from pathlib import Path  # For file path handling
 
+st.title("Stock Price Prediction")
 # Sidebar inputs for user interaction
 st.sidebar.title("Stock Prediction Settings")
 ticker = st.sidebar.text_input("Ticker Symbol", value="AAPL")  # Default to AAPL
@@ -41,7 +42,7 @@ if run_button:
     model_folder = "SavedMLModels"
 
     data_path = abspath.joinpath(data_folder, f"{ticker}_data.csv")
-    model_path = abspath.joinpath(model_folder, "A1_StockPricePredictor_model.h5")
+    model_path = abspath.joinpath(model_folder, "StockPricePredictor_V1_model.h5")
 
     today_str = datetime.date.today().isoformat()
     data = pd.DataFrame()
