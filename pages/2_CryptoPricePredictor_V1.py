@@ -17,7 +17,7 @@ from pathlib import Path  # For file path handling
 
 st.title("Crypto Price Prediction")
 # Sidebar inputs for user interaction
-st.sidebar.title("Crypto Price Prediction")
+st.sidebar.title("Crypto Prediction Settings")
 ticker = st.sidebar.text_input("Ticker Symbol", value="BTC-USD")
 start_date = st.sidebar.date_input("Start Date", datetime.date(2020, 1, 1))  # Default start date
 end_date = st.sidebar.date_input("End Date", datetime.date.today())  # Default end date
