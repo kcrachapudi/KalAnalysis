@@ -3,6 +3,33 @@ from pathlib import Path
 import numpy as np
 import datetime
 import traceback
+import os
+import yfinance as yf
+
+def GetTickerData(ticker, data_path, start_date, end_date, onlycol=None)->pd.DataFrame:
+    today_str = datetime.date.today().isoformat()
+    data = pd.DataFrame()
+    getlocal = False
+    if os.path.exists(data_path):
+        mod_time = datetime.date.fromtimestamp(os.path.getmtime(data_path)).isoformat()
+        if mod_time == today_str:
+            getlocal = True
+            data = pd.read_csv(data_path, index_col=0, parse_dates=True)
+        else:
+            getlocal = False
+    else:
+        getlocal = False
+
+    if getlocal:
+        data = pd.read_csv(data_path, index_col=0, parse_dates=True)
+    else:
+        # Download historical data from Yahoo Finance
+        data = yf.download(ticker, start=start_date, end=end_date, multi_level_index=False)
+        data.to_csv(data_path)  
+    
+    if(onlycol is not None):
+        data = data[[onlycol]]
+    return data
 
 
 def get_download_details():

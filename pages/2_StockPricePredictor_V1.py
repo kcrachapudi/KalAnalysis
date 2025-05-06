@@ -14,19 +14,22 @@ import plotly.graph_objs as go  # Interactive plotting
 import io  # For CSV download
 import os  # For checking model existence
 from pathlib import Path  # For file path handling
+from Utilities import Utils  # Custom utility functions
 
-st.title("Stock Price Prediction")
+AppName = "StockPricePredictor_V1"
+st.title("Stock Price Predictor V1")
 # Sidebar inputs for user interaction
 st.sidebar.title("Stock Prediction Settings")
-ticker = st.sidebar.text_input("Ticker Symbol", value="AAPL")  # Default to AAPL
-start_date = st.sidebar.date_input("Start Date", datetime.date(2020, 1, 1))  # Default start date
-end_date = st.sidebar.date_input("End Date", datetime.date.today())  # Default end date
-future_days = st.sidebar.slider("Days to Forecast", min_value=1, max_value=30, value=5)
-epochs = st.sidebar.slider("Training Epochs", min_value=5, max_value=100, value=10, step=5)
-batch_size = st.sidebar.slider("Batch Size", min_value=16, max_value=128, value=32, step=16)
-save_model_option = st.sidebar.checkbox("Save Trained Model", value=True)
-load_model_option = st.sidebar.checkbox("Load Existing Model if Available", value=True)
-run_button = st.sidebar.button("Run Prediction")
+
+ticker = st.sidebar.text_input("Ticker Symbol", value="AAPL", key=f"{AppName}_ticker")  # Default to AAPL
+start_date = st.sidebar.date_input("Start Date", datetime.date(2020, 1, 1), key=f"{AppName}_start_date")  # Default start date
+end_date = st.sidebar.date_input("End Date", datetime.date.today(), key=f"{AppName}_end_date")  # Default end date
+future_days = st.sidebar.slider("Days to Forecast", min_value=1, max_value=30, value=5, key=f"{AppName}_future_days")
+epochs = st.sidebar.slider("Training Epochs", min_value=5, max_value=100, value=10, step=5, key=f"{AppName}_epochs")
+batch_size = st.sidebar.slider("Batch Size", min_value=16, max_value=128, value=32, step=16, key=f"{AppName}_batch_size")
+save_model_option = st.sidebar.checkbox("Save Trained Model", value=True, key=f"{AppName}_save_model_option")
+load_model_option = st.sidebar.checkbox("Load Existing Model if Available", value=True, key=f"{AppName}_load_model_option")
+run_button = st.sidebar.button("Run Prediction", key=f"{AppName}_run_button")
 
 abspath =  Path(__file__).parent.parent.absolute()
 
@@ -42,22 +45,11 @@ if run_button:
     model_folder = "SavedMLModels"
 
     data_path = abspath.joinpath(data_folder, f"{ticker}_data.csv")
-    model_path = abspath.joinpath(model_folder, "StockPricePredictor_V1_model.h5")
+    model_path = abspath.joinpath(model_folder, f"{AppName}_model.h5")
 
     today_str = datetime.date.today().isoformat()
     data = pd.DataFrame()
-    if os.path.exists(data_path):
-        mod_time = datetime.date.fromtimestamp(os.path.getmtime(data_path)).isoformat()
-        if mod_time == today_str:
-            data = pd.read_csv(data_path, index_col=0, parse_dates=True)
-        else:
-            # Download historical stock data from Yahoo Finance
-            data = yf.download(ticker, start=start_date, end=end_date, multi_level_index=False)
-            data.to_csv(data_path)
-    else:
-        # Download historical stock data from Yahoo Finance
-        data = yf.download(ticker, start=start_date, end=end_date, multi_level_index=False)
-        data.to_csv(data_path)
+    data = Utils.GetTickerData(ticker=ticker, data_path=data_path, start_date=start_date, end_date=end_date)
 
     #Data Preview 
     st.subheader(f"{ticker} Historical Data")
